@@ -11,22 +11,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import static wb.WB_StartupConstants.PATH_DRAFTS;
 import wb.data.Draft;
-import javafx.collections.ObservableList;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 import javax.json.JsonValue;
 import wb.data.Hitter;
 import wb.data.Pitcher;
-import wb.data.Player;
 import wb.data.Team;
 
 /**
@@ -78,13 +78,27 @@ public class JsonDraftFileManager implements DraftFileManager{
        //MAKE A JSON ARRAY FOR THE TEAMS ARRAY
        JsonArray teamsJsonArray = makeTeamsJsonArray(draftToSave.getTeams());
        
+   }
+   
+   @Override
+   public void loadDraft(Draft draftToLoad, String jsonFilePath) throws IOException {
+       //LOAD JSON FILE WITH DATA
+       JsonObject json = loadJSONFile(jsonFilePath);
        
+       //LOAD COURSE INFO
+       draftToLoad.setNumber(json.getInt(JSON_NUMBER));
        
+       JsonArray teamNames = json.getJsonArray(JSON_TEAMS);
+       
+       for(int i = 0; i < teamNames.size(); i++){
+           Team team = new Team();
+           draftToLoad.addTeam(loadTeam(team, teamNames.getString(i)).getName());
+       }
        
    }
    
    @Override
-   public void saveTeams(List<Object> teams, String filePath) {
+   public void saveTeams(List<Object> teams, String filePath) throws IOException{
        Iterator it = teams.iterator();
        while(it.hasNext()){
            Team teamToSave = (Team) it.next();
@@ -102,8 +116,8 @@ public class JsonDraftFileManager implements DraftFileManager{
            JsonObject teamNameJsonObject = makeTeamNameJsonObject(teamName);
            
            //MAKE A JSON ARRAY FOR THE PLAYERS THE TEAM HAS
-           JsonArray hittersJsonArray = makePlayersJsonArray(teamToSave.getHitters());
-           JsonArray pitchersJsonArray = makePlayersJsonArray(teamToSave.getPitchers());
+           JsonArray hittersJsonArray = makeHittersJsonArray(teamToSave.getHitters());
+           JsonArray pitchersJsonArray = makePitchersJsonArray(teamToSave.getPitchers());
            
            //BUILD THE TEAM WITH ALL THE DATA
        JsonObject teamJsonObject = Json.createObjectBuilder()
@@ -117,26 +131,16 @@ public class JsonDraftFileManager implements DraftFileManager{
        jsonWriter.writeObject(teamJsonObject);   
        }
    }
+
    
-   
-   public ArrayList<Team> loadTeams(String jsonFilePath) throws IOException {
-       ArrayList<String> teamsArray = loadArrayFromJSONFile(jsonFilePath, JSON_TEAMS);
-       ArrayList<String> cleanedArray = new ArrayList();
-       for(String s: teamsArray) {
-           //GET RID OF ALL QUOTE CHARACTERS
-           s = s.replaceAll("\"", "");
-           cleanedArray.add(s);
-        }
-       return cleanedArray;
-   }
-   
-   public Team loadTeam(Team teamToLoad, String teamFilePath) throws IOException {
+   public Team loadTeam(Team teamToLoad, String teamName) throws IOException {
        //LOAD JSON OBJECT
+       String teamFilePath = PATH_DRAFTS + teamName + JSON_EXT;
        JsonObject json = loadJSONFile(teamFilePath);
        
        //LOAD THE TEAM
        
-       teamToLoad.setNumber(json.getInt(JSON_NUMBER));
+       teamToLoad.setDraftNumber(json.getInt(JSON_NUMBER));
        teamToLoad.setName(json.getString(JSON_TEAM));
        
        //GET PLAYERS
@@ -182,7 +186,7 @@ public class JsonDraftFileManager implements DraftFileManager{
        
    }
    
-   public Pitcher loadPitcher(Pitcher playerToLoad, int index){
+   public Pitcher loadPitcher(Pitcher playerToLoad, int index) throws IOException{
        String pitchersFilePath = PATH_DRAFTS + SLASH + "Pitchers" + JSON_EXT;
        
        JsonObject pitchersObject = loadJSONFile(pitchersFilePath);
@@ -244,6 +248,72 @@ public class JsonDraftFileManager implements DraftFileManager{
         JsonArray jA = buildJsonArray(data);
         JsonObject arrayObject = Json.createObjectBuilder().add(JSON_SUBJECTS, jA).build();
         return arrayObject;
+    }
+
+    private JsonObject makeNumberJsonObject(int number) {
+        JsonObject jso = Json.createObjectBuilder().add(JSON_NUMBER, number)
+                                                    .build();
+        return jso;
+    }
+
+    private JsonArray makeTeamsJsonArray(List<String> teams) {
+        JsonArrayBuilder jsb = Json.createArrayBuilder();
+        for(String s: teams) {
+            jsb.add(s);
+        }
+        JsonArray jA = jsb.build();
+        return jA;
+    }
+
+    private JsonObject makeTeamNameJsonObject(String teamName) {
+        JsonObject jso = Json.createObjectBuilder().add(JSON_TEAM, teamName)
+                                                    .build();
+        return jso;
+    }
+
+    private JsonArray makeHittersJsonArray(List<Hitter> hitters) {
+        JsonArrayBuilder jsb = Json.createArrayBuilder();
+        for(Hitter h : hitters) {
+            JsonObjectBuilder jso = Json.createObjectBuilder().add(JSON_TEAM, h.getMLBTeam())
+                                                       .add(JSON_LNAME, h.getLastName())
+                                                       .add(JSON_FNAME, h.getFirstName())
+                                                       .add(JSON_QP, h.getPosition())
+                                                       .add(JSON_AB, h.getAtBats())
+                                                       .add(JSON_R, h.getRuns())
+                                                       .add(JSON_H, h.getHits())
+                                                       .add(JSON_HR, h.getHomeRuns())
+                                                       .add(JSON_RBI, h.getRBI())
+                                                       .add(JSON_SB, h.getStolenBases())
+                                                       .add(JSON_NOTES, h.getNotes())
+                                                       .add(JSON_YEAR, h.getYearOfBirth())
+                                                       .add(JSON_NATION, h.getNationOfBirth());
+                                                       
+            jsb.add(jso);                                    
+        }
+        JsonArray jA = jsb.build();
+        return jA;
+    }
+
+    private JsonArray makePitchersJsonArray(List<Pitcher> pitchers) {
+        JsonArrayBuilder jsb = Json.createArrayBuilder();
+        for(Pitcher p: pitchers){
+            JsonObjectBuilder jso = Json.createObjectBuilder().add(JSON_TEAM, p.getMLBTeam())
+                                                       .add(JSON_LNAME, p.getLastName())
+                                                       .add(JSON_FNAME, p.getFirstName())
+                                                       .add(JSON_IP, p.getIP())
+                                                       .add(JSON_ER, p.getEarnedRuns())
+                                                       .add(JSON_W, p.getWins())
+                                                       .add(JSON_SV, p.getHits())
+                                                       .add(JSON_H, p.getHits())
+                                                       .add(JSON_BB, p.getWalks())
+                                                       .add(JSON_K, p.getStrikeouts())
+                                                       .add(JSON_NOTES, p.getNotes())
+                                                       .add(JSON_YEAR, p.getYearOfBirth())
+                                                       .add(JSON_NATION, p.getNationOfBirth());
+            jsb.add(jso);
+        }
+        JsonArray jA = jsb.build();
+        return jA;
     }
        
        
