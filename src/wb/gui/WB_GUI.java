@@ -7,6 +7,7 @@ package wb.gui;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -37,6 +38,7 @@ import static wb.WB_StartupConstants.PATH_CSS;
 import static wb.WB_StartupConstants.PATH_IMAGES;
 import wb.controller.FileController;
 import wb.controller.PlayerController;
+import wb.controller.ScreenController;
 import wb.data.Draft;
 import wb.data.DraftDataManager;
 import wb.data.DraftDataView;
@@ -75,6 +77,9 @@ public class WB_GUI implements DraftDataView{
     //THE FOLLOWING HANDLES ALL THE USER INTERACTIONS WITH ALL THE CONTROLS
     PlayerController playerController;
     
+    //THIS HANDLES THE BOTTOM TOOLBAR TO SWITCH SCREENS
+    ScreenController screenController;
+    
     //APPLICATION WINDOW
     Stage primaryStage;
     
@@ -100,10 +105,16 @@ public class WB_GUI implements DraftDataView{
     Button draftSummaryButton;
     Button mlbTeamsButton;
     
+    //SCREEN STRINGS
+    static String TEAMS_SCREEN = "teams screen";
+    static String PLAYER_SCREEN = "player screen";
+    static String STANDINGS_SCREEN = "standings screen";
+    static String DRAFT_SCREEN = "draft screen";
+    static String MLB_SCREEN = "mlb screen";
     //ORGANIZE WORKSPACE COMPONENTS USING A BORDER PANE
     boolean workspaceActivated;
     
-    ArrayList<Pane> workspacePanes;
+    HashMap<String, Pane> workspacePanes;
     
     //THIS WILL BE THE WORKSPACE FOR THE PLAYERS SCREEN
     //WHICH SHOULD CONTAIN A GRID PANE WITH A LABEL, RADIO BUTTON CONTROLS,
@@ -168,6 +179,19 @@ public class WB_GUI implements DraftDataView{
     VBox mlbTopPane;
     Label mlbTeamsLabel;
     BorderPane mlbWorkspacePane;
+    
+    //PLAYER POSITIONS
+    static final String ALL = "All";
+    static final String CATCHER = "C";
+    static final String FIRST_BASE = "1B";
+    static final String CI = "CI";
+    static final String SECOND_BASE = "2B";
+    static final String THIRD_BASE = "3B";
+    static final String MI = "MI";
+    static final String SHORTSTOP = "SS";
+    static final String OUTFIELDER = "OF";
+    static final String U = "U";
+    static final String PITCHER = "P";
     
     //TABLE COLUMNS
     static final String COL_FIRSTNAME = "First";
@@ -345,6 +369,12 @@ public class WB_GUI implements DraftDataView{
     
     private void initWorkspace() throws IOException {
         
+        workspacePanes = new HashMap<String, Pane>();
+        workspacePanes.put(TEAMS_SCREEN, teamsWorkspacePane);
+        workspacePanes.put(PLAYER_SCREEN, playersWorkspacePane);
+        workspacePanes.put(STANDINGS_SCREEN, standingsWorkspacePane);
+        workspacePanes.put(MLB_SCREEN, mlbWorkspacePane);
+        
         initTopWorkspaces();
         
         initPlayersScreenControls();
@@ -405,32 +435,78 @@ public class WB_GUI implements DraftDataView{
        
        positionSelectionPane = new GridPane();
        playerPositionsGroup = new ToggleGroup();
-       allButton = new RadioButton("All");
-       cButton = new RadioButton("C");
-       firstBaseButton = new RadioButton("1B");
-       ciButton = new RadioButton("CI");
-       secondBaseButton = new RadioButton("2B");
-       thirdBaseButton = new RadioButton("3B");
-       miButton = new RadioButton("MI");
-       ssButton = new RadioButton("SS");
-       ofButton = new RadioButton("OF");
-       uButton = new RadioButton("U");
-       pButton = new RadioButton("P");
+       allButton = initGridRadioButton(positionSelectionPane, ALL, playerPositionsGroup, 0, 0, 1, 1);//new RadioButton("All");
+       cButton = initGridRadioButton(positionSelectionPane, CATCHER, playerPositionsGroup, 1, 0, 1, 1);//new RadioButton("C");
+       firstBaseButton = initGridRadioButton(positionSelectionPane, FIRST_BASE, playerPositionsGroup, 2, 0, 1, 1); //new RadioButton("1B");
+       ciButton = initGridRadioButton(positionSelectionPane, CI, playerPositionsGroup, 3, 0, 1, 1);//new RadioButton("CI");
+       secondBaseButton = initGridRadioButton(positionSelectionPane, SECOND_BASE, playerPositionsGroup, 4, 0, 1, 1); //new RadioButton("2B");
+       thirdBaseButton = initGridRadioButton(positionSelectionPane, THIRD_BASE, playerPositionsGroup, 5, 0, 1, 1); //new RadioButton("3B");
+       miButton = initGridRadioButton(positionSelectionPane, MI, playerPositionsGroup, 6, 0, 1, 1);//new RadioButton("MI");
+       ssButton = initGridRadioButton(positionSelectionPane, SHORTSTOP, playerPositionsGroup, 0, 1, 1, 1);//new RadioButton("SS");
+       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 1, 1, 1, 1);//new RadioButton("OF");
+       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 1, 2, 1, 1);//new RadioButton("U");
+       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup,1, 3, 1, 1);//new RadioButton("P");
        
-       allButton.setToggleGroup(playerPositionsGroup);
-       cButton.setToggleGroup(playerPositionsGroup);
-       firstBaseButton.setToggleGroup(playerPositionsGroup);
-       ciButton.setToggleGroup(playerPositionsGroup);
-       secondBaseButton.setToggleGroup(playerPositionsGroup);
-       thirdBaseButton.setToggleGroup(playerPositionsGroup);
-       miButton.setToggleGroup(playerPositionsGroup);
-       ofButton.setToggleGroup(playerPositionsGroup);
-       uButton.setToggleGroup(playerPositionsGroup);
-       pButton.setToggleGroup(playerPositionsGroup);
+      
+       
        
        
     }
     
+    private void changeScreen(String screen) {
+        
+        BorderPane newPane = (BorderPane) workspacePanes.get(screen);
+        primaryStage.setScene(new Scene(newPane));
+        
+    }
+
+    private void initEventHandlers() throws IOException {
+        // FIRST THE FILE CONTROLS
+        fileController = new FileController(messageDialog, yesNoCancelDialog, draftFileManager, draftExporter);
+        newDraftButton.setOnAction(e -> {
+            fileController.handleNewDraftRequest(this);
+        });
+        loadDraftButton.setOnAction(e -> {
+            fileController.handleLoadDraftRequest(this);
+        });
+        saveDraftButton.setOnAction(e -> {
+            fileController.handleSaveDraftRequest(this, dataManager.getDraft());
+        });
+        exportDraftButton.setOnAction(e -> {
+            fileController.handleExportDraftRequest(this);
+        });
+        exitButton.setOnAction(e -> {
+            fileController.handleExitRequest(this);
+        });
+        
+        //NOW THE BOTTOM TOOLBAR CONTROLS
+        screenController = new ScreenController();
+        fantasyTeamsButton.setOnAction(e -> {
+            screenController.handleScreenChangeRequest(this, TEAMS_SCREEN);
+        });
+        playersButton.setOnAction(e -> {
+            screenController.handleScreenChangeRequest(this, PLAYER_SCREEN);
+        });
+        teamsStandingsButton.setOnAction(null);
+        draftSummaryButton.setOnAction(null);
+        mlbTeamsButton.setOnAction(null);
+        //NOW THE PLAYERS SCREEN
+        playerController = new PlayerController();
+        addPlayerButton.setOnAction(e -> {
+            playerController.handleAddPlayerRequest(this);
+        });
+        removePlayerButton.setOnAction(e -> {
+            playerController.handleRemovePlayerRequest(this);
+        });
+        
+        registerSearchBarController(playerSearchBar);
+    }
+    
+    private void registerSearchBarController(TextField textField) {
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            playerController.handlePlayerSearchRequest(this, newValue);
+        });
+    }
     private Button initChildButton(Pane toolbar, WB_PropertyType icon, WB_PropertyType tooltip, boolean disabled) {
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         String imagePath = "file:" + PATH_IMAGES + props.getProperty(icon.toString());
@@ -484,6 +560,12 @@ public class WB_GUI implements DraftDataView{
         return button;
     }
     
+    private RadioButton initGridRadioButton(GridPane container, String position, ToggleGroup group, int col, int row, int colSpan, int rowSpan) {
+        RadioButton rButton = new RadioButton(position);
+        rButton.setToggleGroup(group);
+        container.add(rButton, col, row, colSpan, rowSpan);
+        return rButton;
+    }
     // INIT A TEXT FIELD AND PUT IT IN A GridPane
     private TextField initGridTextField(GridPane container, int size, String initText, boolean editable, int col, int row, int colSpan, int rowSpan) {
         TextField tf = new TextField();
