@@ -23,6 +23,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
@@ -88,6 +89,8 @@ public class WB_GUI implements DraftDataView{
     
     //PANE THAT ORGANIZES THE BIG PICTURE CONTAINERS
     BorderPane wbPane;
+    
+    ScrollPane workspaceScrollPane;
     
     //FILE TOOLBAR
     FlowPane fileToolbarPane;
@@ -172,7 +175,7 @@ public class WB_GUI implements DraftDataView{
     //DRAFT SUMMARY SCREEN WORKSPACE
     VBox draftTopPane;
     Label draftSummaryLabel;
-    BorderPane draftWorkspacesPane;
+    BorderPane draftWorkspacePane;
     
     
     //MLB TEAMS SCREEN WORKSPACE
@@ -286,7 +289,7 @@ public class WB_GUI implements DraftDataView{
     public void activateWorkspace() {
         if(!workspaceActivated) {
             //PUT THE MAIN WORKSPACE IN THE GUI WHEN A NEW DRAFT STARTS
-            wbPane.setCenter(teamsWorkspacePane);
+            wbPane.setCenter(workspaceScrollPane);
             workspaceActivated = true;
         }
     }
@@ -310,6 +313,14 @@ public class WB_GUI implements DraftDataView{
         exportDraftButton.setDisable(false);
     }
     
+    public void changeScreen(String screen) {
+        
+        workspaceActivated = false;
+        BorderPane newPane = (BorderPane) workspacePanes.get(screen);
+        workspaceScrollPane.setContent(newPane);
+        workspaceActivated = true;
+    }
+    
     public void updateDraftInfo(Draft draft) {
         
     }
@@ -331,6 +342,8 @@ public class WB_GUI implements DraftDataView{
         saveDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.SAVE_DRAFT_ICON, WB_PropertyType.SAVE_DRAFT_TOOLTIP, true);
         exportDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.EXPORT_DRAFT_ICON, WB_PropertyType.EXPORT_DRAFT_TOOLTIP, true);
         exitButton = initChildButton(fileToolbarPane, WB_PropertyType.EXIT_ICON, WB_PropertyType.EXIT_TOOLTIP, true);
+        
+        screenToolbarPane = new FlowPane();
         
         fantasyTeamsButton = initChildButton(screenToolbarPane, WB_PropertyType.TEAMS_SCREEN_ICON, WB_PropertyType.TEAMS_SCREEN_TOOLTIP, true);
         playersButton = initChildButton(screenToolbarPane, WB_PropertyType.PLAYERS_SCREEN_ICON, WB_PropertyType.PLAYERS_SCREEN_TOOLTIP, true);
@@ -369,11 +382,7 @@ public class WB_GUI implements DraftDataView{
     
     private void initWorkspace() throws IOException {
         
-        workspacePanes = new HashMap<String, Pane>();
-        workspacePanes.put(TEAMS_SCREEN, teamsWorkspacePane);
-        workspacePanes.put(PLAYER_SCREEN, playersWorkspacePane);
-        workspacePanes.put(STANDINGS_SCREEN, standingsWorkspacePane);
-        workspacePanes.put(MLB_SCREEN, mlbWorkspacePane);
+        
         
         initTopWorkspaces();
         
@@ -386,6 +395,30 @@ public class WB_GUI implements DraftDataView{
         //initDraftScreenControls();
         
         //initMLBTeamsScreenControls();
+        
+        teamsWorkspacePane = new BorderPane();
+        playersWorkspacePane = new BorderPane();
+        standingsWorkspacePane = new BorderPane();
+        draftWorkspacePane = new BorderPane();
+        mlbWorkspacePane = new BorderPane();
+        
+        workspacePanes = new HashMap<String, Pane>();
+        workspacePanes.put(TEAMS_SCREEN, teamsWorkspacePane);
+        workspacePanes.put(PLAYER_SCREEN, playersWorkspacePane);
+        workspacePanes.put(STANDINGS_SCREEN, standingsWorkspacePane);
+        workspacePanes.put(DRAFT_SCREEN, draftWorkspacePane);
+        workspacePanes.put(MLB_SCREEN, mlbWorkspacePane);
+        
+        teamsWorkspacePane.setTop(teamsTopPane);
+        playersWorkspacePane.setTop(playersTopPane);
+        standingsWorkspacePane.setTop(standingsTopPane);
+        draftWorkspacePane.setTop(draftTopPane);
+        mlbWorkspacePane.setTop(mlbTopPane);
+        
+        workspaceScrollPane = new ScrollPane();
+        workspaceScrollPane.setContent(teamsWorkspacePane);
+        workspaceScrollPane.setFitToWidth(true);
+        workspaceActivated = false;
         
         
     }
@@ -446,19 +479,10 @@ public class WB_GUI implements DraftDataView{
        ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 1, 1, 1, 1);//new RadioButton("OF");
        uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 1, 2, 1, 1);//new RadioButton("U");
        pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup,1, 3, 1, 1);//new RadioButton("P");
-       
       
-       
-       
        
     }
     
-    private void changeScreen(String screen) {
-        
-        BorderPane newPane = (BorderPane) workspacePanes.get(screen);
-        primaryStage.setScene(new Scene(newPane));
-        
-    }
 
     private void initEventHandlers() throws IOException {
         // FIRST THE FILE CONTROLS
