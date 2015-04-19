@@ -6,6 +6,7 @@
 package wb;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Locale;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
@@ -16,15 +17,17 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import wb.error.ErrorHandler;
-import wb.file.JsonPlayerFileManager;
 import wb.gui.WB_GUI;
 import properties_manager.PropertiesManager;
+import static wb.WB_PropertyType.PROP_APP_TITLE;
 import static wb.WB_StartupConstants.PATH_BASE;
 import static wb.WB_StartupConstants.PATH_DATA;
 import static wb.WB_StartupConstants.PATH_SITES;
 import static wb.WB_StartupConstants.PROPERTIES_FILE_NAME;
 import static wb.WB_StartupConstants.PROPERTIES_SCHEMA_FILE_NAME;
+import wb.data.DraftDataManager;
 import wb.file.DraftSiteExporter;
+import wb.file.JsonDraftFileManager;
 import xml_utilities.InvalidXMLFileFormatException;
 
 /**
@@ -50,24 +53,23 @@ public class WolfieBall extends Application {
                  
                 //WE WILL READ AND SAVE OUR PLAYER DATA USING THE JSON FILE
                 //FORMATER SO THIS OBJECT WILL HANDLE THAT
-                JsonPlayerFileManager jsonFileManager = new JsonPlayerFileManager();
-                
+                JsonDraftFileManager jsonDraftManager = new JsonDraftFileManager();
                 //THIS EXPORTS THE DRAFT RESULTS INTO A WEB PAGE
                 DraftSiteExporter exporter = new DraftSiteExporter(PATH_BASE, PATH_SITES);
-                
+               
                 //THIS WILL LOAD THE DATA FROM JSON FILES
                 
                 //INTILIAZE GUI STUFF
                 gui = new WB_GUI(primaryStage);
-                gui.getPlayerFileManager(jsonFileManager);
-                gui.setSiteExporter(exporter);
+                gui.setDraftFileManager(jsonDraftManager);
+                gui.setDraftExporter(exporter);
                 
                 //CONSTRUCT THE DATA MANAGER AND GIVE IT TO THE GUI
-                PlayerDataManager dataManager = new PlayerDataManager(gui);
+                DraftDataManager dataManager = new DraftDataManager(gui);
                 gui.setDataManager(dataManager);
                 
                 //START THE WINDOW THAT THE USER SEES
-                gui.initGUI(appTitle,);
+                gui.initGUI(appTitle);
             }
             catch(IOException ioe) {
                 eH = ErrorHandler.getErrorHandler();
