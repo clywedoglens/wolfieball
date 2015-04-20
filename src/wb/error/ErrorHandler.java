@@ -5,10 +5,46 @@
  */
 package wb.error;
 
+import javafx.stage.Stage;
+import properties_manager.PropertiesManager;
+import static wb.WB_StartupConstants.CLOSE_BUTTON_LABEL;
+import static wb.WB_StartupConstants.PROPERTIES_FILE_ERROR_MESSAGE;
+import wb.gui.MessageDialog;
+import wb.data.Draft;
+
 /**
  *
  * @author George
  */
 public class ErrorHandler {
     
+    static ErrorHandler singleton;
+    
+    MessageDialog messageDialog;
+    
+    PropertiesManager properties;
+    
+    private ErrorHandler() {
+        
+        singleton = null;
+        
+        properties = PropertiesManager.getPropertiesManager();
+    }
+    
+    public void initMessageDialog(Stage owner) {
+        
+        messageDialog = new MessageDialog(owner, CLOSE_BUTTON_LABEL);
+    }
+    
+    public static ErrorHandler getErrorHandler() {
+        
+        if(singleton == null)
+            singleton = new ErrorHandler();
+        
+        return singleton;
+    }
+    
+    public void handlePropertiesFileError() {
+        messageDialog.show(properties.getProperty(PROPERTIES_FILE_ERROR_MESSAGE));
+    }
 }

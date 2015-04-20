@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package wb.file;
+package wb.data;
 
 /**
  *
  * @author George
  */
-public class PlayerFileManager {
-    
+public interface DraftDataView {
+    public void reloadDraft(Draft draftToReload);
 }

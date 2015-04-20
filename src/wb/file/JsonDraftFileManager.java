@@ -13,8 +13,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import static wb.WB_StartupConstants.PATH_DRAFTS;
 import wb.data.Draft;
 import javax.json.Json;
@@ -25,8 +28,10 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 import javax.json.JsonWriter;
 import javax.json.JsonValue;
+import static wb.WB_StartupConstants.PATH_DATA;
 import wb.data.Hitter;
 import wb.data.Pitcher;
+import wb.data.Player;
 import wb.data.Team;
 
 /**
@@ -95,6 +100,8 @@ public class JsonDraftFileManager implements DraftFileManager{
            draftToLoad.addTeam(loadTeam(team, teamNames.getString(i)).getName());
        }
        
+       loadAllPlayers(draftToLoad);
+       
    }
    
    @Override
@@ -147,64 +154,79 @@ public class JsonDraftFileManager implements DraftFileManager{
        JsonArray jsonHittersArray = json.getJsonArray(JSON_HITTERS);
        for(int i = 0; i < jsonHittersArray.size(); i++){
            Hitter newHitter = new Hitter();
-           teamToLoad.addHitter(loadHitter(newHitter, jsonHittersArray.getInt(i)));
+           JsonObject h = jsonHittersArray.getJsonObject(i);
+           teamToLoad.addHitter((Hitter) loadHitter(newHitter, h));
        }
        
        JsonArray jsonPitchersArray = json.getJsonArray(JSON_PITCHERS);
        for(int i = 0; i < jsonPitchersArray.size(); i++){
            Pitcher newPitcher = new Pitcher();
-           teamToLoad.addPitcher(loadPitcher(newPitcher, jsonPitchersArray.getInt(i)));
+           JsonObject p = jsonPitchersArray.getJsonObject(i);
+           teamToLoad.addPitcher((Pitcher) loadPitcher(newPitcher, p));
        }
        return teamToLoad;
        
    }
    
-   public Hitter loadHitter(Hitter playerToLoad, int index) throws IOException {
-      //LOAD THE HITTERS AND PITCHERS OBJECTS AND ARRAYS
-       String hittersFilePath = PATH_DRAFTS + SLASH + "Hitters" + JSON_EXT;
+   @Override
+   public void loadAllPlayers(Draft draft) throws IOException{
+       String pitchersFilePath = PATH_DATA + SLASH + "Pitchers" + JSON_EXT;
+       String hittersFilePath = PATH_DATA + SLASH + "Hitters" + JSON_EXT;
+       
+       JsonObject pitchers = loadJSONFile(pitchersFilePath);
+       JsonObject hitters = loadJSONFile(hittersFilePath);
+       
+       JsonArray allPitchers = pitchers.getJsonArray(JSON_PITCHERS);
+       for(int i = 0; i < allPitchers.size(); i++){
+           Player pitcher = new Player();
+           JsonObject p = allPitchers.getJsonObject(i);
+           draft.addPlayer(loadPitcher(pitcher, p));
+       }
+       JsonArray allHitters = hitters.getJsonArray(JSON_HITTERS);
+       for(int i = 0; i < allHitters.size(); i++){
+           Player hitter = new Player();
+           JsonObject h = allHitters.getJsonObject(i);
+           draft.addPlayer(loadHitter(hitter, h));
+       }
        
        
-       JsonObject hittersObject = loadJSONFile(hittersFilePath);
-       JsonArray hitters = hittersObject.getJsonArray(JSON_HITTERS);
-       JsonObject hitterObject = hitters.getJsonObject(index);
+   }
+   public Player loadHitter(Player playerToLoad, JsonObject hitterObject) throws IOException {
        
        playerToLoad.setMLBTeam(hitterObject.getString(JSON_TEAM));
        playerToLoad.setLastName(hitterObject.getString(JSON_LNAME));
        playerToLoad.setFirstName(hitterObject.getString(JSON_FNAME));
        playerToLoad.setPosition(hitterObject.getString(JSON_QP));
-       playerToLoad.setAtBats(hitterObject.getInt(JSON_AB));
-       playerToLoad.setRuns(hitterObject.getInt(JSON_R));
-       playerToLoad.setHits(hitterObject.getInt(JSON_H));
-       playerToLoad.setHomeRuns(hitterObject.getInt(JSON_HR));
-       playerToLoad.setRBI(hitterObject.getInt(JSON_RBI));
-       playerToLoad.setStolenBases(hitterObject.getInt(JSON_SB));
+       playerToLoad.setIPAB(hitterObject.getString(JSON_AB));
+       playerToLoad.setERR(hitterObject.getString(JSON_R));
+       playerToLoad.setWH(hitterObject.getString(JSON_H));
+       playerToLoad.setSVHR(hitterObject.getString(JSON_HR));
+       playerToLoad.setHRBI(hitterObject.getString(JSON_RBI));
+       playerToLoad.setBBSB(hitterObject.getString(JSON_SB));
+       playerToLoad.setK("N/A");
        playerToLoad.setNotes(hitterObject.getString(JSON_NOTES));
-       playerToLoad.setYearOfBirth(hitterObject.getInt(JSON_YEAR));
+       playerToLoad.setYearOfBirth(hitterObject.getString(JSON_YEAR));
        playerToLoad.setNationOfBirth(hitterObject.getString(JSON_NATION));
        
        return playerToLoad;
        
    }
    
-   public Pitcher loadPitcher(Pitcher playerToLoad, int index) throws IOException{
-       String pitchersFilePath = PATH_DRAFTS + SLASH + "Pitchers" + JSON_EXT;
-       
-       JsonObject pitchersObject = loadJSONFile(pitchersFilePath);
-       JsonArray pitchers = pitchersObject.getJsonArray(JSON_PITCHERS);
-       JsonObject pitcherObject = pitchers.getJsonObject(index);
+   public Player loadPitcher(Player playerToLoad, JsonObject pitcherObject) throws IOException{
        
        playerToLoad.setMLBTeam(pitcherObject.getString(JSON_TEAM));
        playerToLoad.setLastName(pitcherObject.getString(JSON_LNAME));
        playerToLoad.setFirstName(pitcherObject.getString(JSON_FNAME));
-       playerToLoad.setIP(pitcherObject.getInt(JSON_IP));
-       playerToLoad.setEarnedRuns(pitcherObject.getInt(JSON_ER));
-       playerToLoad.setWins(pitcherObject.getInt(JSON_W));
-       playerToLoad.setSaves(pitcherObject.getInt(JSON_SV));
-       playerToLoad.setHits(pitcherObject.getInt(JSON_H));
-       playerToLoad.setWalks(pitcherObject.getInt(JSON_BB));
-       playerToLoad.setStrikeouts(pitcherObject.getInt(JSON_K));
+       playerToLoad.setPosition("P");
+       playerToLoad.setIPAB(pitcherObject.getString(JSON_IP));
+       playerToLoad.setERR(pitcherObject.getString(JSON_ER));
+       playerToLoad.setWH(pitcherObject.getString(JSON_W));
+       playerToLoad.setSVHR(pitcherObject.getString(JSON_SV));
+       playerToLoad.setHRBI(pitcherObject.getString(JSON_H));
+       playerToLoad.setBBSB(pitcherObject.getString(JSON_BB));
+       playerToLoad.setK(pitcherObject.getString(JSON_K));
        playerToLoad.setNotes(pitcherObject.getString(JSON_NOTES));
-       playerToLoad.setYearOfBirth(pitcherObject.getInt(JSON_YEAR));
+       playerToLoad.setYearOfBirth(pitcherObject.getString(JSON_YEAR));
        playerToLoad.setNationOfBirth(pitcherObject.getString(JSON_NATION));
        
        return playerToLoad;
@@ -242,14 +264,6 @@ public class JsonDraftFileManager implements DraftFileManager{
         return jA;
     }
     
-    // BUILDS AND RETURNS A JsonObject CONTAINING A JsonArray
-    // THAT CONTAINS THE PROVIDED DATA
-    public JsonObject buildJsonArrayObject(List<Object> data) {
-        JsonArray jA = buildJsonArray(data);
-        JsonObject arrayObject = Json.createObjectBuilder().add(JSON_SUBJECTS, jA).build();
-        return arrayObject;
-    }
-
     private JsonObject makeNumberJsonObject(int number) {
         JsonObject jso = Json.createObjectBuilder().add(JSON_NUMBER, number)
                                                     .build();

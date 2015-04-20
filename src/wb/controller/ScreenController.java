@@ -5,10 +5,23 @@
  */
 package wb.controller;
 
+import wb.gui.WB_GUI;
+
 /**
  *
  * @author George
  */
 public class ScreenController {
+    private boolean enabled;
     
+    public ScreenController(){
+        enabled = true;
+    }
+    
+    public void handleScreenChangeRequest(WB_GUI gui, String screen){
+        if(enabled){
+            gui.changeScreen(screen);
+        }
+        
+    }
 }

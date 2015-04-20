@@ -5,10 +5,23 @@
  */
 package wb.file;
 
+import wb.data.Draft;
+
 /**
  *
  * @author George
  */
 public class DraftSiteExporter {
     
+    String baseDir;
+    String sitesDir;
+    
+    public DraftSiteExporter (String initBaseDir, String initSitesDir) {
+        baseDir = initBaseDir;
+        sitesDir = initSitesDir;
+    }
+    
+    public void exportDraftSite(Draft draftToExport) throws Exception {
+        
+    }
 }
