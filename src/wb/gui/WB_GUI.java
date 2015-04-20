@@ -157,12 +157,12 @@ public class WB_GUI implements DraftDataView{
     TableColumn playerProTeamColumn;
     TableColumn playerPositionsColumn;
     TableColumn playerYearOfBirthColumn;
-    TableColumn playerRWColumn;
-    TableColumn playerHRSVColumn;
-    TableColumn playerRBIKColumn;
-    TableColumn playerSBERAColumn;
-    TableColumn playerBAWHIPColumn;
-    TableColumn playerEstValueColumn;
+    TableColumn playerIPABColumn;
+    TableColumn playerWHColumn;
+    TableColumn playerSVHRColumn;
+    TableColumn playerHRBIColumn;
+    TableColumn playerBBSBColumn;
+    TableColumn playerKColumn;
     TableColumn playerNotesColumn;
     
     
@@ -209,22 +209,12 @@ public class WB_GUI implements DraftDataView{
     static final String COL_PROTEAM = "Pro Team";
     static final String COL_POSITIONS = "Positions";
     static final String COL_YEAROFBIRTH = "Year of Birth";
-    static final String COL_RUNSORWINS = "R/W";
-    static final String COL_RUNS = "R";
-    static final String COL_WINS = "W";
-    static final String COL_HRORSAVES = "HR/SV";
-    static final String COL_HOMERUNS = "HR";
-    static final String COL_SAVES = "SV";
-    static final String COL_RBIORK = "RBI/K";
-    static final String COL_RBI = "RBI";
-    static final String COL_K = "K";
-    static final String COL_SBORERA = "SB/ERA";
-    static final String COL_SB = "SB";
-    static final String COL_ERA = "ERA";
-    static final String COL_BAORWHIP = "BA/WHIP";
-    static final String COL_BA = "BA";
-    static final String COL_WHIP = "WHIP";
-    static final String COL_ESTVAL = "Estimated Value";
+    static final String COL_IPAB = "IP/AB";
+    static final String COL_ERR = "ER/R";
+    static final String COL_WH = "W/H";
+    static final String COL_SVHR = "SV/HR";
+    static final String COL_HRBI = "H/RBI";
+    static final String COL_BBSB = "K";
     static final String COL_NOTES = "Notes";
     
     //DIALOGS
@@ -522,6 +512,15 @@ public class WB_GUI implements DraftDataView{
        playersCenterPane = new BorderPane();
        playersCenterPane.setTop(playersControlBox);
        playersCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+       
+       playersBox = new VBox();
+       playersTable = new TableView();
+       playersBox.getChildren().add(playersTable);
+       playersBox.getStyleClass().add(CLASS_GRAY_PANE);
+       
+       //SETUP TABLE COLUMNS
+       //playerFirstNameColumn = newTable();
+       
        
        
        
