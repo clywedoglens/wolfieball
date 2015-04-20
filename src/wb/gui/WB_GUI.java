@@ -21,6 +21,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -158,13 +159,14 @@ public class WB_GUI implements DraftDataView{
     TableColumn playerPositionsColumn;
     TableColumn playerYearOfBirthColumn;
     TableColumn playerIPABColumn;
+    TableColumn playerERRColumn;
     TableColumn playerWHColumn;
     TableColumn playerSVHRColumn;
     TableColumn playerHRBIColumn;
     TableColumn playerBBSBColumn;
     TableColumn playerKColumn;
     TableColumn playerNotesColumn;
-    
+    TableColumn playerNationOfBirthColumn;
     
     //FANTASY TEAMS SCREEN WORKSPACE
     VBox teamsTopPane;
@@ -214,8 +216,10 @@ public class WB_GUI implements DraftDataView{
     static final String COL_WH = "W/H";
     static final String COL_SVHR = "SV/HR";
     static final String COL_HRBI = "H/RBI";
-    static final String COL_BBSB = "K";
+    static final String COL_BBSB = "BBSB";
+    static final String COL_K = "K";
     static final String COL_NOTES = "Notes";
+    static final String COL_NATIONOFBIRTH = "Nation of Birth";
     
     //DIALOGS
     MessageDialog messageDialog;
@@ -519,10 +523,54 @@ public class WB_GUI implements DraftDataView{
        playersBox.getStyleClass().add(CLASS_GRAY_PANE);
        
        //SETUP TABLE COLUMNS
-       //playerFirstNameColumn = newTable();
+       playerFirstNameColumn = new TableColumn(COL_FIRSTNAME);
+       playerLastNameColumn = new TableColumn(COL_LASTNAME);
+       playerProTeamColumn = new TableColumn(COL_PROTEAM);
+       playerPositionsColumn = new TableColumn(COL_POSITIONS);
+       playerYearOfBirthColumn = new TableColumn(COL_YEAROFBIRTH);
+       playerIPABColumn = new TableColumn(COL_IPAB);
+       playerERRColumn = new TableColumn(COL_ERR);
+       playerWHColumn = new TableColumn(COL_WH);
+       playerSVHRColumn = new TableColumn(COL_SVHR);
+       playerHRBIColumn = new TableColumn(COL_HRBI);
+       playerBBSBColumn = new TableColumn(COL_BBSB);
+       playerKColumn = new TableColumn(COL_K);
+       playerNotesColumn = new TableColumn(COL_NOTES);
+       playerNationOfBirthColumn = new TableColumn(COL_NATIONOFBIRTH);
        
+       //LINK COLUMNS TO DATA
+       playerFirstNameColumn.setCellValueFactory(new PropertyValueFactory<String, String>("firstName"));
+       playerLastNameColumn.setCellValueFactory(new PropertyValueFactory<String, String>("lastName"));
+       playerProTeamColumn.setCellValueFactory(new PropertyValueFactory<String, String>("mlbTeam"));
+       playerPositionsColumn.setCellValueFactory(new PropertyValueFactory<String, String>("position"));
+       playerYearOfBirthColumn.setCellValueFactory(new PropertyValueFactory<String, String>("yearOfBirth"));
+       playerIPABColumn.setCellValueFactory(new PropertyValueFactory<String, String>("ipab"));
+       playerERRColumn.setCellValueFactory(new PropertyValueFactory<String, String>("err"));
+       playerWHColumn.setCellValueFactory(new PropertyValueFactory<String, String>("wh"));
+       playerSVHRColumn.setCellValueFactory(new PropertyValueFactory<String, String>("svhr"));
+       playerHRBIColumn.setCellValueFactory(new PropertyValueFactory<String, String>("hrbi"));
+       playerBBSBColumn.setCellValueFactory(new PropertyValueFactory<String, String>("bbsb"));
+       playerKColumn.setCellValueFactory(new PropertyValueFactory<String, String>("k"));
+       playerNotesColumn.setCellValueFactory(new PropertyValueFactory<String, String>("notes"));
+       playerNationOfBirthColumn.setCellValueFactory(new PropertyValueFactory<String, String>("nationOfBirth"));
        
+       playersTable.getColumns().add(playerFirstNameColumn);
+       playersTable.getColumns().add(playerLastNameColumn);
+       playersTable.getColumns().add(playerProTeamColumn);
+       playersTable.getColumns().add(playerPositionsColumn);
+       playersTable.getColumns().add(playerYearOfBirthColumn);
+       playersTable.getColumns().add(playerIPABColumn);
+       playersTable.getColumns().add(playerERRColumn);
+       playersTable.getColumns().add(playerWHColumn);
+       playersTable.getColumns().add(playerSVHRColumn);
+       playersTable.getColumns().add(playerHRBIColumn);
+       playersTable.getColumns().add(playerBBSBColumn);
+       playersTable.getColumns().add(playerNotesColumn);
+       playersTable.getColumns().add(playerNationOfBirthColumn);
+       playersTable.setItems(dataManager.getDraft().getAllPlayers());
        
+       //ASSEMBLE EVERYTHING
+       playersCenterPane.setCenter(playersBox);
        
     }
     
