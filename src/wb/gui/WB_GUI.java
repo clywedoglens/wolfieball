@@ -54,6 +54,7 @@ import wb.file.DraftSiteExporter;
 public class WB_GUI implements DraftDataView{
     
     static final String PRIMARY_STYLE_SHEET = PATH_CSS + "wb_style.css";
+    static final String CLASS_GRAY_PANE = "gray_pane";
     static final String CLASS_BORDERED_PANE = "bordered_pane";
     static final String CLASS_SUBJECT_PANE = "subject_pane";
     static final String CLASS_HEADING_LABEL = "heading_label";
@@ -61,6 +62,7 @@ public class WB_GUI implements DraftDataView{
     static final String CLASS_PROMPT_LABEL = "prompt_label";
     static final String EMPTY_TEXT = "";
     static final int LARGE_TEXT_FIELD_LENGTH = 20;
+    static final int MEDIUM_TEXT_FIELD_LENGTH = 12;
     static final int SMALL_TEXT_FIELD_LENGTH = 5;
     
     //MANAGES THE APPLICATION'S DATA
@@ -117,18 +119,21 @@ public class WB_GUI implements DraftDataView{
     //ORGANIZE WORKSPACE COMPONENTS USING A BORDER PANE
     boolean workspaceActivated;
     
-    HashMap<String, Pane> workspacePanes;
+    HashMap<String,Pane> workspacePanes;
     
     //THIS WILL BE THE WORKSPACE FOR THE PLAYERS SCREEN
     //WHICH SHOULD CONTAIN A GRID PANE WITH A LABEL, RADIO BUTTON CONTROLS,
     //SEARCH LABEL, SEARCH BAR AND A TABLE
     VBox playersTopPane;
+    BorderPane playersCenterPane;
     BorderPane playersWorkspacePane;
+    VBox playersControlBox;
+    VBox playersBox;
     SplitPane playersWorkspaceSplitPane;
     GridPane playerSearchPane;
     GridPane positionSelectionPane;
-    GridPane playersTablePane;
     Label playersHeadingLabel;
+    GridPane topPlayersLabelPane;
     Button addPlayerButton;
     Button removePlayerButton;
     Label playerSearchLabel;
@@ -163,7 +168,9 @@ public class WB_GUI implements DraftDataView{
     
     //FANTASY TEAMS SCREEN WORKSPACE
     VBox teamsTopPane;
+    VBox teamsCenterPane;
     Label fantasyTeamsLabel;
+    GridPane topTeamsLabelPane;
     BorderPane teamsWorkspacePane;
     
     
@@ -311,6 +318,13 @@ public class WB_GUI implements DraftDataView{
         //ONCE EDITING THAT FIRST DRAFT BEGINS
         loadDraftButton.setDisable(false);
         exportDraftButton.setDisable(false);
+        fantasyTeamsButton.setDisable(false);
+        playersButton.setDisable(false);
+        teamsStandingsButton.setDisable(false);
+        draftSummaryButton.setDisable(false);
+        mlbTeamsButton.setDisable(false);
+        
+        
     }
     
     public void changeScreen(String screen) {
@@ -388,7 +402,7 @@ public class WB_GUI implements DraftDataView{
         
         initPlayersScreenControls();
         
-        //initFantasyTeamsScreenControls();
+        initFantasyTeamsScreenControls();
         
         //initStandingsScreenControls();
         
@@ -415,9 +429,23 @@ public class WB_GUI implements DraftDataView{
         draftWorkspacePane.setTop(draftTopPane);
         mlbWorkspacePane.setTop(mlbTopPane);
         
+        teamsWorkspacePane.setCenter(teamsCenterPane);
+        teamsWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
+        
+        playersWorkspacePane.setCenter(playersCenterPane);
+        playersWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
+        
+        
+        standingsWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
+        
+        draftWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
+        
+        mlbWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
+        
         workspaceScrollPane = new ScrollPane();
         workspaceScrollPane.setContent(teamsWorkspacePane);
         workspaceScrollPane.setFitToWidth(true);
+        workspaceScrollPane.setFitToHeight(true);
         workspaceActivated = false;
         
         
@@ -425,22 +453,22 @@ public class WB_GUI implements DraftDataView{
     
     private void initTopWorkspaces(){
         
-        playersWorkspaceSplitPane = new SplitPane();
-        playersWorkspaceSplitPane.getItems().add(playerSearchPane);
-        playersWorkspaceSplitPane.getItems().add(positionSelectionPane);
         
      
         playersTopPane = new VBox();
-        playersTopPane.getStyleClass().add(CLASS_BORDERED_PANE);
         
-        playersHeadingLabel = initChildLabel(playersTopPane, WB_PropertyType.PLAYER_AVAILABLE_LABEL, CLASS_HEADING_LABEL);
+        playersTopPane.getStyleClass().add(CLASS_GRAY_PANE);
+        topPlayersLabelPane = new GridPane();
+        playersHeadingLabel = initGridLabel(topPlayersLabelPane, WB_PropertyType.PLAYER_AVAILABLE_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
         
-        playersTopPane.getChildren().add(playersWorkspaceSplitPane);
+        playersTopPane.getChildren().add(topPlayersLabelPane);
         
         teamsTopPane = new VBox();
-        teamsTopPane.getStyleClass().add(CLASS_BORDERED_PANE);
+        topTeamsLabelPane = new GridPane();
+        teamsTopPane.getStyleClass().add(CLASS_GRAY_PANE);
         
-        fantasyTeamsLabel = initChildLabel(teamsTopPane, WB_PropertyType.FANTASY_TEAMS_LABEL, CLASS_HEADING_LABEL);
+        fantasyTeamsLabel = initGridLabel(topTeamsLabelPane, WB_PropertyType.FANTASY_TEAMS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
+        teamsTopPane.getChildren().add(topTeamsLabelPane);
         
         standingsTopPane = new VBox();
         standingsTopPane.getStyleClass().add(CLASS_BORDERED_PANE);
@@ -458,29 +486,50 @@ public class WB_GUI implements DraftDataView{
         mlbTeamsLabel = initChildLabel(mlbTopPane, WB_PropertyType.MLB_TEAMS_LABEL, CLASS_HEADING_LABEL);
      
     }
+    
+ 
     private void initPlayersScreenControls() {
        playerSearchPane = new GridPane();
         
        addPlayerButton = initGridButton(playerSearchPane, WB_PropertyType.ADD_PLAYER_ICON, WB_PropertyType.ADD_PLAYER_TOOLTIP, 0, 0, 1, 1, false);
        removePlayerButton = initGridButton(playerSearchPane, WB_PropertyType.REMOVE_PLAYER_ICON, WB_PropertyType.REMOVE_PLAYER_TOOLTIP, 1, 0, 1, 1, false);
        playerSearchLabel = initGridLabel(playerSearchPane, WB_PropertyType.PLAYER_SEARCH_LABEL, CLASS_SUBHEADING_LABEL, 0, 1, 1, 1);
-       playerSearchBar = initGridTextField(playerSearchPane, SMALL_TEXT_FIELD_LENGTH, EMPTY_TEXT, true, 1, 1, 1, 1);
+       playerSearchBar = initGridTextField(playerSearchPane, MEDIUM_TEXT_FIELD_LENGTH, EMPTY_TEXT, true, 1, 1, 1, 1);
        
        positionSelectionPane = new GridPane();
        playerPositionsGroup = new ToggleGroup();
        allButton = initGridRadioButton(positionSelectionPane, ALL, playerPositionsGroup, 0, 0, 1, 1);//new RadioButton("All");
-       cButton = initGridRadioButton(positionSelectionPane, CATCHER, playerPositionsGroup, 1, 0, 1, 1);//new RadioButton("C");
-       firstBaseButton = initGridRadioButton(positionSelectionPane, FIRST_BASE, playerPositionsGroup, 2, 0, 1, 1); //new RadioButton("1B");
-       ciButton = initGridRadioButton(positionSelectionPane, CI, playerPositionsGroup, 3, 0, 1, 1);//new RadioButton("CI");
-       secondBaseButton = initGridRadioButton(positionSelectionPane, SECOND_BASE, playerPositionsGroup, 4, 0, 1, 1); //new RadioButton("2B");
-       thirdBaseButton = initGridRadioButton(positionSelectionPane, THIRD_BASE, playerPositionsGroup, 5, 0, 1, 1); //new RadioButton("3B");
-       miButton = initGridRadioButton(positionSelectionPane, MI, playerPositionsGroup, 6, 0, 1, 1);//new RadioButton("MI");
-       ssButton = initGridRadioButton(positionSelectionPane, SHORTSTOP, playerPositionsGroup, 0, 1, 1, 1);//new RadioButton("SS");
-       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 1, 1, 1, 1);//new RadioButton("OF");
-       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 1, 2, 1, 1);//new RadioButton("U");
-       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup,1, 3, 1, 1);//new RadioButton("P");
+       cButton = initGridRadioButton(positionSelectionPane, CATCHER, playerPositionsGroup, 3, 0, 1, 1);//new RadioButton("C");
+       firstBaseButton = initGridRadioButton(positionSelectionPane, FIRST_BASE, playerPositionsGroup, 6, 0, 1, 1); //new RadioButton("1B");
+       ciButton = initGridRadioButton(positionSelectionPane, CI, playerPositionsGroup, 9, 0, 1, 1);//new RadioButton("CI");
+       secondBaseButton = initGridRadioButton(positionSelectionPane, SECOND_BASE, playerPositionsGroup, 12, 0, 1, 1); //new RadioButton("2B");
+       thirdBaseButton = initGridRadioButton(positionSelectionPane, THIRD_BASE, playerPositionsGroup, 15, 0, 1, 1); //new RadioButton("3B");
+       miButton = initGridRadioButton(positionSelectionPane, MI, playerPositionsGroup, 18, 0, 1, 1);//new RadioButton("MI");
+       ssButton = initGridRadioButton(positionSelectionPane, SHORTSTOP, playerPositionsGroup, 21, 0, 1, 1);//new RadioButton("SS");
+       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 24, 0, 1, 1);//new RadioButton("OF");
+       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 27, 0, 1, 1);//new RadioButton("U");
+       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 30, 0, 1, 1);//new RadioButton("P");
       
+       playersWorkspaceSplitPane = new SplitPane();
+       playersWorkspaceSplitPane.getItems().add(playerSearchPane);
+       playersWorkspaceSplitPane.getItems().add(positionSelectionPane);
+       playersWorkspaceSplitPane.getStyleClass().add(CLASS_BORDERED_PANE);
        
+       playersControlBox = new VBox();
+       playersControlBox.getStyleClass().add(CLASS_BORDERED_PANE);
+       playersControlBox.getChildren().add(playersWorkspaceSplitPane);
+       
+       playersCenterPane = new BorderPane();
+       playersCenterPane.setTop(playersControlBox);
+       playersCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+       
+       
+       
+    }
+    
+    private void initFantasyTeamsScreenControls(){
+        teamsCenterPane = new VBox();
+        teamsCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
     }
     
 
@@ -531,6 +580,7 @@ public class WB_GUI implements DraftDataView{
             playerController.handlePlayerSearchRequest(this, newValue);
         });
     }
+    
     private Button initChildButton(Pane toolbar, WB_PropertyType icon, WB_PropertyType tooltip, boolean disabled) {
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         String imagePath = "file:" + PATH_IMAGES + props.getProperty(icon.toString());
