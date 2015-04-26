@@ -43,9 +43,9 @@
         <property name="FANTASY_TEAMS_LABEL"           value="Fantasy Teams"></property>
         <property name="PLAYER_AVAILABLE_LABEL"         value="Available Players"></property>
         <property name="PLAYER_SEARCH_LABEL"           value="Search:"></property>
-		<property name="STANDINGS_HEADING_LABEL"       value="Fantasy Standings"></property>
-        <property name="DRAFT_HEADING_LABEL"           value="Draft Summary"></property>
-        <property name="MLB_HEADING_LABEL"             value="MLB Teams"></property>
+		<property name="FANTASY_STANDINGS_LABEL"       value="Fantasy Standings"></property>
+        <property name="DRAFT_SUMMARY_LABEL"           value="Draft Summary"></property>
+        <property name="MLB_TEAMS_LABEL"             value="MLB Teams"></property>
         
         
         <!-- ERROR MESSAGES -->

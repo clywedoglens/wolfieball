@@ -178,18 +178,24 @@ public class WB_GUI implements DraftDataView{
     
     //FANTASY STANDINGS SCREEN WORKSPACE
     VBox standingsTopPane;
+    VBox standingsCenterPane;
     Label fantasyStandingsLabel;
+    GridPane standingsLabelPane;
     BorderPane standingsWorkspacePane;
     
     //DRAFT SUMMARY SCREEN WORKSPACE
     VBox draftTopPane;
+    VBox draftCenterPane;
     Label draftSummaryLabel;
+    GridPane draftLabelPane;
     BorderPane draftWorkspacePane;
     
     
     //MLB TEAMS SCREEN WORKSPACE
     VBox mlbTopPane;
+    VBox mlbCenterPane;
     Label mlbTeamsLabel;
+    GridPane mlbLabelPane;
     BorderPane mlbWorkspacePane;
     
     //PLAYER POSITIONS
@@ -349,7 +355,7 @@ public class WB_GUI implements DraftDataView{
         loadDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.LOAD_DRAFT_ICON, WB_PropertyType.LOAD_DRAFT_TOOLTIP, false);
         saveDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.SAVE_DRAFT_ICON, WB_PropertyType.SAVE_DRAFT_TOOLTIP, true);
         exportDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.EXPORT_DRAFT_ICON, WB_PropertyType.EXPORT_DRAFT_TOOLTIP, true);
-        exitButton = initChildButton(fileToolbarPane, WB_PropertyType.EXIT_ICON, WB_PropertyType.EXIT_TOOLTIP, true);
+        exitButton = initChildButton(fileToolbarPane, WB_PropertyType.EXIT_ICON, WB_PropertyType.EXIT_TOOLTIP, false);
         
         screenToolbarPane = new FlowPane();
         
@@ -398,11 +404,11 @@ public class WB_GUI implements DraftDataView{
         
         initFantasyTeamsScreenControls();
         
-        //initStandingsScreenControls();
+        initStandingsScreenControls();
         
-        //initDraftScreenControls();
+        initDraftScreenControls();
         
-        //initMLBTeamsScreenControls();
+        initMLBTeamsScreenControls();
         
         teamsWorkspacePane = new BorderPane();
         playersWorkspacePane = new BorderPane();
@@ -429,11 +435,13 @@ public class WB_GUI implements DraftDataView{
         playersWorkspacePane.setCenter(playersCenterPane);
         playersWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
         
-        
+        standingsWorkspacePane.setCenter(standingsCenterPane);
         standingsWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
         
+        draftWorkspacePane.setCenter(draftCenterPane);
         draftWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
         
+        mlbWorkspacePane.setCenter(mlbCenterPane);
         mlbWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
         
         workspaceScrollPane = new ScrollPane();
@@ -460,24 +468,31 @@ public class WB_GUI implements DraftDataView{
         teamsTopPane = new VBox();
         topTeamsLabelPane = new GridPane();
         teamsTopPane.getStyleClass().add(CLASS_GRAY_PANE);
-        
         fantasyTeamsLabel = initGridLabel(topTeamsLabelPane, WB_PropertyType.FANTASY_TEAMS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
         teamsTopPane.getChildren().add(topTeamsLabelPane);
         
         standingsTopPane = new VBox();
-        standingsTopPane.getStyleClass().add(CLASS_BORDERED_PANE);
+        standingsLabelPane = new GridPane();
+        fantasyStandingsLabel = initGridLabel(standingsLabelPane, WB_PropertyType.FANTASY_STANDINGS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
+        standingsTopPane.getStyleClass().add(CLASS_GRAY_PANE);
+        standingsTopPane.getChildren().add(standingsLabelPane); 
         
-        fantasyStandingsLabel = initChildLabel(standingsTopPane, WB_PropertyType.FANTASY_STANDINGS_LABEL, CLASS_HEADING_LABEL);
-        
+              
         draftTopPane = new VBox();
-        draftTopPane.getStyleClass().add(CLASS_BORDERED_PANE);
+        draftLabelPane = new GridPane();
+        draftSummaryLabel = initGridLabel(draftLabelPane, WB_PropertyType.DRAFT_SUMMARY_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
+        draftTopPane.getStyleClass().add(CLASS_GRAY_PANE);
+        draftTopPane.getChildren().add(draftLabelPane);
         
-        draftSummaryLabel = initChildLabel(draftTopPane, WB_PropertyType.DRAFT_SUMMARY_LABEL, CLASS_HEADING_LABEL);
+        
         
         mlbTopPane = new VBox();
-        mlbTopPane.getStyleClass().add(CLASS_BORDERED_PANE);
+        mlbLabelPane = new GridPane();
+        mlbTeamsLabel = initGridLabel(mlbLabelPane, WB_PropertyType.MLB_TEAMS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
+        mlbTopPane.getStyleClass().add(CLASS_GRAY_PANE);
+        mlbTopPane.getChildren().add(mlbLabelPane);
         
-        mlbTeamsLabel = initChildLabel(mlbTopPane, WB_PropertyType.MLB_TEAMS_LABEL, CLASS_HEADING_LABEL);
+        
      
     }
     
@@ -539,20 +554,20 @@ public class WB_GUI implements DraftDataView{
        playerNationOfBirthColumn = new TableColumn(COL_NATIONOFBIRTH);
        
        //LINK COLUMNS TO DATA
-       playerFirstNameColumn.setCellValueFactory(new PropertyValueFactory<String, String>("firstName"));
-       playerLastNameColumn.setCellValueFactory(new PropertyValueFactory<String, String>("lastName"));
-       playerProTeamColumn.setCellValueFactory(new PropertyValueFactory<String, String>("mlbTeam"));
-       playerPositionsColumn.setCellValueFactory(new PropertyValueFactory<String, String>("position"));
-       playerYearOfBirthColumn.setCellValueFactory(new PropertyValueFactory<String, String>("yearOfBirth"));
-       playerIPABColumn.setCellValueFactory(new PropertyValueFactory<String, String>("ipab"));
-       playerERRColumn.setCellValueFactory(new PropertyValueFactory<String, String>("err"));
-       playerWHColumn.setCellValueFactory(new PropertyValueFactory<String, String>("wh"));
-       playerSVHRColumn.setCellValueFactory(new PropertyValueFactory<String, String>("svhr"));
-       playerHRBIColumn.setCellValueFactory(new PropertyValueFactory<String, String>("hrbi"));
-       playerBBSBColumn.setCellValueFactory(new PropertyValueFactory<String, String>("bbsb"));
-       playerKColumn.setCellValueFactory(new PropertyValueFactory<String, String>("k"));
-       playerNotesColumn.setCellValueFactory(new PropertyValueFactory<String, String>("notes"));
-       playerNationOfBirthColumn.setCellValueFactory(new PropertyValueFactory<String, String>("nationOfBirth"));
+       playerFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
+       playerLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
+       playerProTeamColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("MLBTeam"));
+       playerPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
+       playerYearOfBirthColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("yearOfBirth"));
+       playerIPABColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("IPAB"));
+       playerERRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("ERR"));
+       playerWHColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("WH"));
+       playerSVHRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SVHR"));
+       playerHRBIColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("HRBI"));
+       playerBBSBColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BBSB"));
+       playerKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("K"));
+       playerNotesColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("notes"));
+       playerNationOfBirthColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("nationOfBirth"));
        
        playersTable.getColumns().add(playerFirstNameColumn);
        playersTable.getColumns().add(playerLastNameColumn);
@@ -579,6 +594,20 @@ public class WB_GUI implements DraftDataView{
         teamsCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
     }
     
+    private void initStandingsScreenControls(){
+        standingsCenterPane = new VBox();
+        standingsCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+    }
+    
+    private void initDraftScreenControls(){
+        draftCenterPane = new VBox();
+        draftCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+    }
+    
+    private void initMLBTeamsScreenControls(){
+         mlbCenterPane = new VBox(); 
+         mlbCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+    }
 
     private void initEventHandlers() throws IOException {
         // FIRST THE FILE CONTROLS
@@ -607,9 +636,15 @@ public class WB_GUI implements DraftDataView{
         playersButton.setOnAction(e -> {
             screenController.handleScreenChangeRequest(this, PLAYER_SCREEN);
         });
-        teamsStandingsButton.setOnAction(null);
-        draftSummaryButton.setOnAction(null);
-        mlbTeamsButton.setOnAction(null);
+        teamsStandingsButton.setOnAction(e -> {
+            screenController.handleScreenChangeRequest(this, STANDINGS_SCREEN);
+        });
+        draftSummaryButton.setOnAction(e -> {
+            screenController.handleScreenChangeRequest(this, DRAFT_SCREEN);
+        });
+        mlbTeamsButton.setOnAction(e -> {
+            screenController.handleScreenChangeRequest(this, MLB_SCREEN);
+        });
         //NOW THE PLAYERS SCREEN
         playerController = new PlayerController();
         addPlayerButton.setOnAction(e -> {
