@@ -517,7 +517,8 @@ public class WB_GUI implements DraftDataView{
        ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 18, 0, 1, 1);//new RadioButton("OF");
        uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 21, 0, 1, 1);//new RadioButton("U");
        pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 24, 0, 1, 1);//new RadioButton("P");
-      
+       allButton.setSelected(true);
+       
        playersWorkspaceSplitPane = new SplitPane();
        playersWorkspaceSplitPane.getItems().add(playerSearchPane);
        playersWorkspaceSplitPane.getItems().add(positionSelectionPane);
@@ -735,6 +736,7 @@ public class WB_GUI implements DraftDataView{
     
     private RadioButton initGridRadioButton(GridPane container, String position, ToggleGroup group, int col, int row, int colSpan, int rowSpan) {
         RadioButton rButton = new RadioButton(position);
+        rButton.setUserData(position);
         rButton.setToggleGroup(group);
         container.add(rButton, col, row, colSpan, rowSpan);
         return rButton;
