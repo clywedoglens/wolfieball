@@ -8,6 +8,7 @@ package wb.gui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,11 +18,13 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
@@ -202,10 +205,8 @@ public class WB_GUI implements DraftDataView{
     static final String ALL = "All";
     static final String CATCHER = "C";
     static final String FIRST_BASE = "1B";
-    static final String CI = "CI";
     static final String SECOND_BASE = "2B";
     static final String THIRD_BASE = "3B";
-    static final String MI = "MI";
     static final String SHORTSTOP = "SS";
     static final String OUTFIELDER = "OF";
     static final String U = "U";
@@ -509,15 +510,13 @@ public class WB_GUI implements DraftDataView{
        playerPositionsGroup = new ToggleGroup();
        allButton = initGridRadioButton(positionSelectionPane, ALL, playerPositionsGroup, 0, 0, 1, 1);//new RadioButton("All");
        cButton = initGridRadioButton(positionSelectionPane, CATCHER, playerPositionsGroup, 3, 0, 1, 1);//new RadioButton("C");
-       firstBaseButton = initGridRadioButton(positionSelectionPane, FIRST_BASE, playerPositionsGroup, 6, 0, 1, 1); //new RadioButton("1B");
-       ciButton = initGridRadioButton(positionSelectionPane, CI, playerPositionsGroup, 9, 0, 1, 1);//new RadioButton("CI");
-       secondBaseButton = initGridRadioButton(positionSelectionPane, SECOND_BASE, playerPositionsGroup, 12, 0, 1, 1); //new RadioButton("2B");
-       thirdBaseButton = initGridRadioButton(positionSelectionPane, THIRD_BASE, playerPositionsGroup, 15, 0, 1, 1); //new RadioButton("3B");
-       miButton = initGridRadioButton(positionSelectionPane, MI, playerPositionsGroup, 18, 0, 1, 1);//new RadioButton("MI");
-       ssButton = initGridRadioButton(positionSelectionPane, SHORTSTOP, playerPositionsGroup, 21, 0, 1, 1);//new RadioButton("SS");
-       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 24, 0, 1, 1);//new RadioButton("OF");
-       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 27, 0, 1, 1);//new RadioButton("U");
-       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 30, 0, 1, 1);//new RadioButton("P");
+       firstBaseButton = initGridRadioButton(positionSelectionPane, FIRST_BASE, playerPositionsGroup, 6, 0, 1, 1);
+       secondBaseButton = initGridRadioButton(positionSelectionPane, SECOND_BASE, playerPositionsGroup, 9, 0, 1, 1); //new RadioButton("2B");
+       thirdBaseButton = initGridRadioButton(positionSelectionPane, THIRD_BASE, playerPositionsGroup, 12, 0, 1, 1);
+       ssButton = initGridRadioButton(positionSelectionPane, SHORTSTOP, playerPositionsGroup, 15, 0, 1, 1);//new RadioButton("SS");
+       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 18, 0, 1, 1);//new RadioButton("OF");
+       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 21, 0, 1, 1);//new RadioButton("U");
+       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 24, 0, 1, 1);//new RadioButton("P");
       
        playersWorkspaceSplitPane = new SplitPane();
        playersWorkspaceSplitPane.getItems().add(playerSearchPane);
@@ -569,6 +568,18 @@ public class WB_GUI implements DraftDataView{
        playerNotesColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("notes"));
        playerNationOfBirthColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("nationOfBirth"));
        
+       //MAKE THE NOTES CELLS EDITABLE BY THE USER
+       playersTable.setEditable(true);
+       playerNotesColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+       playerNotesColumn.setOnEditCommit(
+            new EventHandler<CellEditEvent<Player,String>>(){
+                @Override
+                public void handle(CellEditEvent<Player, String> t) {
+                    ((Player) t.getTableView().getItems().get(
+                    t.getTablePosition().getRow())
+                    ).setNotes(t.getNewValue());
+                }
+            });
        playersTable.getColumns().add(playerFirstNameColumn);
        playersTable.getColumns().add(playerLastNameColumn);
        playersTable.getColumns().add(playerProTeamColumn);
@@ -654,12 +665,18 @@ public class WB_GUI implements DraftDataView{
             playerController.handleRemovePlayerRequest(this);
         });
         
+        registerToggleGroup(playerPositionsGroup);
         registerSearchBarController(playerSearchBar);
     }
     
+    private void registerToggleGroup(ToggleGroup group){
+        group.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            playerController.handlePositionSelectRequest(this, playersTable, newValue);
+        });
+    }
     private void registerSearchBarController(TextField textField) {
         textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            playerController.handlePlayerSearchRequest(this, newValue);
+            playerController.handlePlayerSearchRequest(this, playersTable, newValue);
         });
     }
     
