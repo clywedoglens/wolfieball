@@ -44,6 +44,7 @@ import static wb.WB_StartupConstants.PATH_IMAGES;
 import wb.controller.FileController;
 import wb.controller.PlayerController;
 import wb.controller.ScreenController;
+import wb.controller.TeamsController;
 import wb.data.Draft;
 import wb.data.DraftDataManager;
 import wb.data.DraftDataView;
@@ -83,6 +84,9 @@ public class WB_GUI implements DraftDataView{
     
     //THE FOLLOWING HANDLES ALL THE USER INTERACTIONS WITH ALL THE CONTROLS
     PlayerController playerController;
+    
+    //THIS HANDLES ALL THE USER INTERACTIONS WITH THE TEAMS SCREEN
+    TeamsController teamsController;
     
     //THIS HANDLES THE BOTTOM TOOLBAR TO SWITCH SCREENS
     ScreenController screenController;
@@ -177,7 +181,30 @@ public class WB_GUI implements DraftDataView{
     Label fantasyTeamsLabel;
     GridPane topTeamsLabelPane;
     BorderPane teamsWorkspacePane;
-    
+    GridPane lineupPane;
+    HBox lineupButtonsPane;
+    Label draftNameLabel;
+    TextField draftNameTextField;
+    Button addTeamButton;
+    Button removeTeamButton;
+    Button editTeamButton;
+    Label selectTeamLabel;
+    ComboBox selectTeamComboBox;
+    VBox fantasyTableBox;
+    Label startingLineupLabel;
+    TableView<Player> fantasyTable;
+    TableColumn fantasyFirstNameColumn;
+    TableColumn fantasyLastNameColumn;
+    TableColumn fantasyProTeamColumn;
+    TableColumn fantasyPositionsColumn;
+    TableColumn fantasyYearOfBirthColumn;
+    TableColumn fantasyIPABColumn;
+    TableColumn fantasyERRColumn;
+    TableColumn fantasyWHColumn;
+    TableColumn fantasySVHRColumn;
+    TableColumn fantasyHRBIColumn;
+    TableColumn fantasyBBSBColumn;
+    TableColumn fantasyKColumn;
     
     //FANTASY STANDINGS SCREEN WORKSPACE
     VBox standingsTopPane;
@@ -601,9 +628,57 @@ public class WB_GUI implements DraftDataView{
        
     }
     
-    private void initFantasyTeamsScreenControls(){
+    private void initFantasyTeamsScreenControls() throws IOException {
         teamsCenterPane = new VBox();
         teamsCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+        
+        lineupPane = new GridPane();
+        draftNameLabel = initGridLabel(lineupPane, WB_PropertyType.DRAFT_NAME_LABEL, CLASS_SUBHEADING_LABEL, 0, 0, 1, 1);
+        draftNameTextField = initGridTextField(lineupPane, MEDIUM_TEXT_FIELD_LENGTH, EMPTY_TEXT, true, 1, 0, 1, 1 );
+        
+        lineupButtonsPane = new HBox();
+        addTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.ADD_PLAYER_ICON, WB_PropertyType.ADD_TEAM_TOOLTIP, false);
+        removeTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.REMOVE_PLAYER_ICON, WB_PropertyType.REMOVE_TEAM_TOOLTIP, true);
+        editTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.EDIT_TEAM_ICON, WB_PropertyType.EDIT_TEAM_TOOLTIP, true);
+        fantasyTeamsLabel = initChildLabel(lineupButtonsPane, WB_PropertyType.SELECT_TEAM_LABEL, CLASS_SUBHEADING_LABEL);
+        lineupButtonsPane.getChildren().add(selectTeamComboBox = new ComboBox());
+        
+        fantasyTableBox = new VBox();
+        startingLineupLabel = initChildLabel(fantasyTableBox, WB_PropertyType.STARTING_LINEUP_LABEL, CLASS_SUBHEADING_LABEL);
+        fantasyTable = new TableView();
+        fantasyTableBox.getChildren().add(fantasyTable);
+        fantasyTableBox.getStyleClass().add(CLASS_BORDERED_PANE);
+        
+        //SETUP TABLE COLUMNS
+       fantasyFirstNameColumn = new TableColumn(COL_FIRSTNAME);
+       fantasyLastNameColumn = new TableColumn(COL_LASTNAME);
+       fantasyProTeamColumn = new TableColumn(COL_PROTEAM);
+       fantasyPositionsColumn = new TableColumn(COL_POSITIONS);
+       fantasyYearOfBirthColumn = new TableColumn(COL_YEAROFBIRTH);
+       fantasyIPABColumn = new TableColumn(COL_IPAB);
+       fantasyERRColumn = new TableColumn(COL_ERR);
+       fantasyWHColumn = new TableColumn(COL_WH);
+       fantasySVHRColumn = new TableColumn(COL_SVHR);
+       fantasyHRBIColumn = new TableColumn(COL_HRBI);
+       fantasyBBSBColumn = new TableColumn(COL_BBSB);
+       fantasyKColumn = new TableColumn(COL_K);
+       
+       fantasyTable.getColumns().add(fantasyFirstNameColumn);
+       fantasyTable.getColumns().add(fantasyLastNameColumn);
+       fantasyTable.getColumns().add(fantasyProTeamColumn);
+       fantasyTable.getColumns().add(fantasyPositionsColumn);
+       fantasyTable.getColumns().add(fantasyYearOfBirthColumn);
+       fantasyTable.getColumns().add(fantasyIPABColumn);
+       fantasyTable.getColumns().add(fantasyERRColumn);
+       fantasyTable.getColumns().add(fantasyWHColumn);
+       fantasyTable.getColumns().add(fantasySVHRColumn);
+       fantasyTable.getColumns().add(fantasyHRBIColumn);
+       fantasyTable.getColumns().add(fantasyBBSBColumn);
+       fantasyTable.getColumns().add(fantasyKColumn);
+        
+        teamsCenterPane.getChildren().add(lineupButtonsPane);
+        teamsCenterPane.getChildren().add(lineupPane);
+        teamsCenterPane.getChildren().add(fantasyTableBox);
     }
     
     private void initStandingsScreenControls(){
@@ -668,8 +743,27 @@ public class WB_GUI implements DraftDataView{
         
         registerToggleGroup(playerPositionsGroup);
         registerSearchBarController(playerSearchBar);
+        
+        //NOW THE FANTASY TEAMS SCREEN
+        addTeamButton.setOnAction(e -> {
+            teamsController.handleAddTeamRequest(this);
+        });
+        removeTeamButton.setOnAction(e -> {
+            teamsController.handleRemoveTeamRequest(this);
+        });
+        editTeamButton.setOnAction(e -> {
+            teamsController.handleEditRequest(this);    
+        });
+        selectTeamComboBox.setOnAction(e -> {
+            teamsController.handleDraftChangeRequest(this);
+        });
     }
     
+    private void registerTextFieldController(TextField textField){
+        textField.textProperty().addListener((observable, oldValue, newValue) -> {
+            teamsController.handleDraftChangeRequest(this, newValue);
+        });
+    }
     private void registerToggleGroup(ToggleGroup group){
         group.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
             playerController.handlePositionSelectRequest(this, playersTable, newValue);

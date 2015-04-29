@@ -5,10 +5,21 @@
  */
 package wb.data;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author George
  */
 public class MLBTeam {
+    private String name;
+    ArrayList<Player> players;
     
+    public MLBTeam(){
+        
+    }
+    
+    public String getName(){
+        return name;
+    }
 }

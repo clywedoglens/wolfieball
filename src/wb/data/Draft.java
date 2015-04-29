@@ -18,10 +18,12 @@ public class Draft {
 
     int number;
     static int counter;
-    List<String> teams;
+    ArrayList<Team> teams;
     ObservableList<Player> allPlayers;
+    ArrayList<MLBTeam> mlbTeams;
     public Draft(){
         teams = new ArrayList();
+        mlbTeams = new ArrayList();
         allPlayers = FXCollections.observableArrayList();
     }
     
@@ -43,12 +45,16 @@ public class Draft {
         return number;
     }
     
-    public List<String> getTeams(){
+    public ArrayList<Team> getTeams(){
         return teams;
     }
     
+    public ArrayList<MLBTeam> getMLBTeams(){
+        return mlbTeams;
+    }
     public void addTeam(String teamName){
-        teams.add(teamName);
+        Team team = new Team(teamName);
+        teams.add(team);
     }
     
     public void clearTeams(){

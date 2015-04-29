@@ -22,6 +22,10 @@ public class Team {
         pitchers = new ArrayList<Pitcher>();
         hitters = new ArrayList<Hitter>();
     }
+
+    public Team(String teamName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
     
     public String getName(){
         return teamName;

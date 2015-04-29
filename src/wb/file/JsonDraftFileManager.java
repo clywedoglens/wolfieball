@@ -81,7 +81,11 @@ public class JsonDraftFileManager implements DraftFileManager{
        JsonObject numberJsonObject = makeNumberJsonObject(draftToSave.getNumber());
        
        //MAKE A JSON ARRAY FOR THE TEAMS ARRAY
-       JsonArray teamsJsonArray = makeTeamsJsonArray(draftToSave.getTeams());
+       ArrayList<Team> teams = draftToSave.getTeams();
+       ArrayList<String> teamNames = new ArrayList();
+       for(Team t: teams)
+           teamNames.add(t.getName());
+       JsonArray teamsJsonArray = makeTeamsJsonArray(teamNames);
        
    }
    

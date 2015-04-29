@@ -24,6 +24,7 @@
 		<property name="STANDINGS_SCREEN_ICON" 	value="Standings.png"></property>
 		<property name="DRAFT_SCREEN_ICON"			value="Draft.png"></property>
 		<property name="MLBTEAMS_SCREEN_ICON"		value="MLBTeams.png"></property>
+		<property name="EDIT_TEAM_ICON"			value="EditItem.png"></property>
         
         <!-- TOOLTIPS FOR BUTTONS -->
         <property name="NEW_DRAFT_TOOLTIP"         value="Create a New Draft League"></property>
@@ -46,6 +47,9 @@
 		<property name="FANTASY_STANDINGS_LABEL"       value="Fantasy Standings"></property>
         <property name="DRAFT_SUMMARY_LABEL"           value="Draft Summary"></property>
         <property name="MLB_TEAMS_LABEL"             value="MLB Teams"></property>
+		<property name="SELECT_TEAM_LABEL"			value="Select Fantasy Team:"></property>
+		<property name="DRAFT_NAME_LABEL"			value="Draft Name:"></property>
+		<property name="STARTING_LINEUP_LABEL"		value="Starting Lineup"></property>
         
         
         <!-- ERROR MESSAGES -->
