@@ -8,6 +8,7 @@ package wb.file;
 import java.io.IOException;
 import java.util.List;
 import javafx.collections.ObservableList;
+import javax.json.JsonObject;
 import wb.data.Draft;
 import wb.data.Player;
 import wb.data.Team;
@@ -19,7 +20,7 @@ import wb.data.Team;
 public interface DraftFileManager {
     public void                 saveDraft(Draft draftToSave) throws IOException;
     public void                 loadDraft(Draft draftToLoad, String coursePath) throws IOException;
-    public Team                 loadTeam(Team teamToLoad, String filePath) throws IOException;
+    public Team                 loadTeam(Team teamToLoad, JsonObject teamJsonObject) throws IOException;
     public void                 loadAllPlayers(Draft draft) throws IOException;
     
     

@@ -790,6 +790,9 @@ public class WB_GUI implements DraftDataView{
         registerSearchBarController(playerSearchBar);
         
         //NOW THE FANTASY TEAMS SCREEN
+        //TEXT FIELDS WORK DIFFERENTLY
+        teamsController = new TeamsController();
+        registerTextFieldController(draftNameTextField);
         addTeamButton.setOnAction(e -> {
             teamsController.handleAddTeamRequest(this);
         });
@@ -803,10 +806,14 @@ public class WB_GUI implements DraftDataView{
         selectTeamComboBox.setOnAction(e -> {
             teamsController.handleDraftChangeRequest(this);
         });
+        
+        
     }
     
     private void registerTextFieldController(TextField textField){
+        textField.textProperty().addListener((observable, oldValue, newValue) ->{
             teamsController.handleDraftChangeRequest(this);
+        });
     }
     private void registerToggleGroup(ToggleGroup group){
         group.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {

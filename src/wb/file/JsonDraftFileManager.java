@@ -98,12 +98,12 @@ public class JsonDraftFileManager implements DraftFileManager{
        
        //LOAD COURSE INFO
        draftToLoad.setName(json.getString(JSON_NAME));
+      
+       JsonArray teams = json.getJsonArray(JSON_TEAMS);
        
-       JsonArray teamNames = json.getJsonArray(JSON_TEAMS);
-       
-       for(int i = 0; i < teamNames.size(); i++){
+       for(int i = 0; i < teams.size(); i++){
            Team team = new Team();
-           draftToLoad.addTeam(loadTeam(team, teamNames.getString(i)));
+           draftToLoad.addTeam(loadTeam(team, teams.getJsonObject(i)));
        }
        
        loadAllPlayers(draftToLoad);
@@ -111,26 +111,22 @@ public class JsonDraftFileManager implements DraftFileManager{
    }
 
    @Override
-   public Team loadTeam(Team teamToLoad, String teamName) throws IOException {
-       //LOAD JSON OBJECT
-       String teamFilePath = PATH_DRAFTS + teamName + JSON_EXT;
-       JsonObject json = loadJSONFile(teamFilePath);
+   public Team loadTeam(Team teamToLoad, JsonObject teamJsonObject) throws IOException {
+       
        
        //LOAD THE TEAM
-       
-       teamToLoad.setDraftNumber(json.getInt(JSON_NUMBER));
-       teamToLoad.setName(json.getString(JSON_TEAM));
-       teamToLoad.setOwnerName(json.getString(JSON_OWNER));
+       teamToLoad.setName(teamJsonObject.getString(JSON_TEAM));
+       teamToLoad.setOwnerName(teamJsonObject.getString(JSON_OWNER));
        
        //GET PLAYERS
-       JsonArray jsonHittersArray = json.getJsonArray(JSON_HITTERS);
+       JsonArray jsonHittersArray = teamJsonObject.getJsonArray(JSON_HITTERS);
        for(int i = 0; i < jsonHittersArray.size(); i++){
            Hitter newHitter = new Hitter();
            JsonObject h = jsonHittersArray.getJsonObject(i);
            teamToLoad.addHitter((Hitter) loadHitter(newHitter, h));
        }
        
-       JsonArray jsonPitchersArray = json.getJsonArray(JSON_PITCHERS);
+       JsonArray jsonPitchersArray = teamJsonObject.getJsonArray(JSON_PITCHERS);
        for(int i = 0; i < jsonPitchersArray.size(); i++){
            Pitcher newPitcher = new Pitcher();
            JsonObject p = jsonPitchersArray.getJsonObject(i);

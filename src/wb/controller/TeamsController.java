@@ -5,6 +5,7 @@
  */
 package wb.controller;
 
+import javafx.stage.Stage;
 import properties_manager.PropertiesManager;
 import wb.WB_PropertyType;
 import wb.data.Draft;
@@ -27,7 +28,8 @@ public class TeamsController {
     MessageDialog messageDialog;
     YesNoCancelDialog yesNoCancelDialog;
     
-    public TeamsController(){
+    public TeamsController(Stage initStage, Draft draft, MessageDialog initMessageDialog){
+        ftd = new FantasyTeamDialog(initStage, draft, initMessageDialog);
         enabled = true;
     }
     
