@@ -15,7 +15,7 @@ import javafx.collections.ObservableList;
  * @author George
  */
 public class Draft {
-
+    String name;
     int number;
     static int counter;
     ArrayList<Team> teams;
@@ -38,6 +38,14 @@ public class Draft {
     public void setAllPlayers(ObservableList<Player> allPlayers){
         this.allPlayers = allPlayers;   
     }
+    
+    public void setName(String name){
+        this.name = name;
+    }
+    
+    public String getName(){
+        return name;
+    }
     public void setNumber(int number) {
         this.number = number;
     }
@@ -52,11 +60,13 @@ public class Draft {
     public ArrayList<MLBTeam> getMLBTeams(){
         return mlbTeams;
     }
-    public void addTeam(String teamName){
-        Team team = new Team(teamName);
+    public void addTeam(Team team){
         teams.add(team);
     }
     
+    public void removeTeam(Team team){
+        teams.remove(team);
+    }
     public void clearTeams(){
         teams.clear();
     }

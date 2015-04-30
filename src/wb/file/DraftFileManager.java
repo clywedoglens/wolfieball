@@ -19,7 +19,6 @@ import wb.data.Team;
 public interface DraftFileManager {
     public void                 saveDraft(Draft draftToSave) throws IOException;
     public void                 loadDraft(Draft draftToLoad, String coursePath) throws IOException;
-    public void                 saveTeams(List<Object> Teams, String filePath) throws IOException;
     public Team                 loadTeam(Team teamToLoad, String filePath) throws IOException;
     public void                 loadAllPlayers(Draft draft) throws IOException;
     

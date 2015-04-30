@@ -8,12 +8,18 @@ package wb.gui;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SplitPane;
@@ -36,6 +42,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
 import properties_manager.PropertiesManager;
 import wb.WB_PropertyType;
 import static wb.WB_StartupConstants.CLOSE_BUTTON_LABEL;
@@ -49,6 +57,7 @@ import wb.data.Draft;
 import wb.data.DraftDataManager;
 import wb.data.DraftDataView;
 import wb.data.Player;
+import wb.data.Team;
 import wb.file.DraftFileManager;
 import wb.file.DraftSiteExporter;
 
@@ -189,7 +198,7 @@ public class WB_GUI implements DraftDataView{
     Button removeTeamButton;
     Button editTeamButton;
     Label selectTeamLabel;
-    ComboBox selectTeamComboBox;
+    ComboBox<Team> selectTeamComboBox;
     VBox fantasyTableBox;
     Label startingLineupLabel;
     TableView<Player> fantasyTable;
@@ -364,7 +373,12 @@ public class WB_GUI implements DraftDataView{
     }
     
     public void updateDraftInfo(Draft draft) {
-        
+        draft.setName(draftNameTextField.getText());
+        Team teamToShow = selectTeamComboBox.getSelectionModel().getSelectedItem();
+        ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
+        fantasyTeamPlayers.addAll(teamToShow.getPitchers());
+        fantasyTeamPlayers.addAll(teamToShow.getHitters());
+        fantasyTable.setItems(fantasyTeamPlayers);
     }
     
     /****************************************************************************/
@@ -641,7 +655,38 @@ public class WB_GUI implements DraftDataView{
         removeTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.REMOVE_PLAYER_ICON, WB_PropertyType.REMOVE_TEAM_TOOLTIP, true);
         editTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.EDIT_TEAM_ICON, WB_PropertyType.EDIT_TEAM_TOOLTIP, true);
         fantasyTeamsLabel = initChildLabel(lineupButtonsPane, WB_PropertyType.SELECT_TEAM_LABEL, CLASS_SUBHEADING_LABEL);
-        lineupButtonsPane.getChildren().add(selectTeamComboBox = new ComboBox());
+        
+        selectTeamComboBox = new ComboBox();
+        selectTeamComboBox.setCellFactory(new Callback<ListView<Team>, ListCell<Team>>() {
+            @Override
+            public ListCell<Team> call(ListView<Team> t) {
+               ListCell cell = new ListCell<Team>() {
+                   @Override
+                   protected void updateItem(Team item, boolean empty){
+                       super.updateItem(item, empty);
+                       if(empty) {
+                           setText("");
+                       } else {
+                           setText(item.getName());
+                       }
+                   }
+               };return cell;
+            }
+        });
+        
+        selectTeamComboBox.setButtonCell(new ListCell<Team>(){
+        @Override
+        protected void updateItem(Team t, boolean bln) {
+            super.updateItem(t, bln);
+            if(bln){
+                setText("");
+            } else {
+                setText(t.getName());
+            }
+        }
+    });
+        
+        lineupButtonsPane.getChildren().add(selectTeamComboBox);
         
         fantasyTableBox = new VBox();
         startingLineupLabel = initChildLabel(fantasyTableBox, WB_PropertyType.STARTING_LINEUP_LABEL, CLASS_SUBHEADING_LABEL);
@@ -748,11 +793,12 @@ public class WB_GUI implements DraftDataView{
         addTeamButton.setOnAction(e -> {
             teamsController.handleAddTeamRequest(this);
         });
+        
         removeTeamButton.setOnAction(e -> {
-            teamsController.handleRemoveTeamRequest(this);
+            teamsController.handleRemoveTeamRequest(this, selectTeamComboBox.getSelectionModel().getSelectedItem());
         });
         editTeamButton.setOnAction(e -> {
-            teamsController.handleEditRequest(this);    
+            teamsController.handleEditTeamRequest(this, selectTeamComboBox.getSelectionModel().getSelectedItem());    
         });
         selectTeamComboBox.setOnAction(e -> {
             teamsController.handleDraftChangeRequest(this);
@@ -760,9 +806,7 @@ public class WB_GUI implements DraftDataView{
     }
     
     private void registerTextFieldController(TextField textField){
-        textField.textProperty().addListener((observable, oldValue, newValue) -> {
-            teamsController.handleDraftChangeRequest(this, newValue);
-        });
+            teamsController.handleDraftChangeRequest(this);
     }
     private void registerToggleGroup(ToggleGroup group){
         group.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {

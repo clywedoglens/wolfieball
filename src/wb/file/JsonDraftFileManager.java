@@ -13,11 +13,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import static wb.WB_StartupConstants.PATH_DRAFTS;
 import wb.data.Draft;
 import javax.json.Json;
@@ -40,12 +37,13 @@ import wb.data.Team;
  */
 public class JsonDraftFileManager implements DraftFileManager{
     //JSON FILE READING AND WRITING CONSTANTS
-    String JSON_NUMBER = "number";
+    String JSON_NAME = "NAME";
     String JSON_TEAMS = "teams";
-    String JSON_PLAYERS = "players";
+    String JSON_PLAYERS = "Players";
     String JSON_HITTERS = "Hitters";
     String JSON_PITCHERS = "Pitchers";
     String JSON_TEAM = "TEAM";
+    String JSON_OWNER = "OWNER";
     String JSON_LNAME = "LAST_NAME";
     String JSON_FNAME = "FIRST_NAME";
     String JSON_IP = "IP";
@@ -70,7 +68,7 @@ public class JsonDraftFileManager implements DraftFileManager{
    @Override
    public void saveDraft(Draft draftToSave) throws IOException {
        //BUILD FILE PATH
-       String draftListing = "" + "Draft #" + draftToSave.getNumber();
+       String draftListing = "" + "" + draftToSave.getName();
        String jsonFilePath = PATH_DRAFTS + SLASH + draftListing + JSON_EXT;
        
        //INITIALIZE WRITER
@@ -78,15 +76,19 @@ public class JsonDraftFileManager implements DraftFileManager{
        JsonWriter jsonWriter = Json.createWriter(os);
        
        //MAKE AN OBJECT FOR THE DRAFT NUMBER
-       JsonObject numberJsonObject = makeNumberJsonObject(draftToSave.getNumber());
+      
        
        //MAKE A JSON ARRAY FOR THE TEAMS ARRAY
-       ArrayList<Team> teams = draftToSave.getTeams();
-       ArrayList<String> teamNames = new ArrayList();
-       for(Team t: teams)
-           teamNames.add(t.getName());
-       JsonArray teamsJsonArray = makeTeamsJsonArray(teamNames);
+       List<Team> teams = draftToSave.getTeams();
+       JsonArray fantasyTeamsJsonArray = makeFantasyTeamsJsonArray(teams);
+   
        
+       //BUILD THE DRAFT
+       JsonObject draftJsonObject = Json.createObjectBuilder()
+                                   .add(JSON_NAME, draftToSave.getName())
+                                   .add(JSON_TEAMS, fantasyTeamsJsonArray)
+               .build();
+   
    }
    
    @Override
@@ -95,55 +97,20 @@ public class JsonDraftFileManager implements DraftFileManager{
        JsonObject json = loadJSONFile(jsonFilePath);
        
        //LOAD COURSE INFO
-       draftToLoad.setNumber(json.getInt(JSON_NUMBER));
+       draftToLoad.setName(json.getString(JSON_NAME));
        
        JsonArray teamNames = json.getJsonArray(JSON_TEAMS);
        
        for(int i = 0; i < teamNames.size(); i++){
            Team team = new Team();
-           draftToLoad.addTeam(loadTeam(team, teamNames.getString(i)).getName());
+           draftToLoad.addTeam(loadTeam(team, teamNames.getString(i)));
        }
        
        loadAllPlayers(draftToLoad);
        
    }
-   
-   @Override
-   public void saveTeams(List<Object> teams, String filePath) throws IOException{
-       Iterator it = teams.iterator();
-       while(it.hasNext()){
-           Team teamToSave = (Team) it.next();
-           String teamName = teamToSave.getName();
-           String teamFileListing = "" + teamName;
-           String teamFilePath = PATH_DRAFTS + SLASH + teamFileListing + JSON_EXT;
-           
-           OutputStream os = new FileOutputStream(teamFilePath);
-           JsonWriter jsonWriter = Json.createWriter(os);
-           
-           //THIS OBJECT WILL KEEP TRACK OF WHICH DRAFT THE TEAM WAS CREATED
-           JsonObject numberJsonObject = makeNumberJsonObject(teamToSave.getDraftNumber());
-                   
-           //MAKE AN OBJECT FOR THE TEAM NAME;
-           JsonObject teamNameJsonObject = makeTeamNameJsonObject(teamName);
-           
-           //MAKE A JSON ARRAY FOR THE PLAYERS THE TEAM HAS
-           JsonArray hittersJsonArray = makeHittersJsonArray(teamToSave.getHitters());
-           JsonArray pitchersJsonArray = makePitchersJsonArray(teamToSave.getPitchers());
-           
-           //BUILD THE TEAM WITH ALL THE DATA
-       JsonObject teamJsonObject = Json.createObjectBuilder()
-                                  .add(JSON_NUMBER, numberJsonObject)
-                                  .add(JSON_TEAM, teamNameJsonObject)
-                                  .add(JSON_HITTERS, hittersJsonArray)
-                                  .add(JSON_PITCHERS, pitchersJsonArray)
-               .build();
-       
-       //SAVE
-       jsonWriter.writeObject(teamJsonObject);   
-       }
-   }
 
-   
+   @Override
    public Team loadTeam(Team teamToLoad, String teamName) throws IOException {
        //LOAD JSON OBJECT
        String teamFilePath = PATH_DRAFTS + teamName + JSON_EXT;
@@ -153,6 +120,7 @@ public class JsonDraftFileManager implements DraftFileManager{
        
        teamToLoad.setDraftNumber(json.getInt(JSON_NUMBER));
        teamToLoad.setName(json.getString(JSON_TEAM));
+       teamToLoad.setOwnerName(json.getString(JSON_OWNER));
        
        //GET PLAYERS
        JsonArray jsonHittersArray = json.getJsonArray(JSON_HITTERS);
@@ -268,16 +236,26 @@ public class JsonDraftFileManager implements DraftFileManager{
         return jA;
     }
     
-    private JsonObject makeNumberJsonObject(int number) {
-        JsonObject jso = Json.createObjectBuilder().add(JSON_NUMBER, number)
+    private JsonObject makeDraftNameJsonObject(String draftName) {
+        JsonObject jso = Json.createObjectBuilder().add(JSON_NAME, draftName)
                                                     .build();
         return jso;
     }
 
-    private JsonArray makeTeamsJsonArray(List<String> teams) {
+    private JsonArray makeFantasyTeamsJsonArray(List<Team> teams) {
         JsonArrayBuilder jsb = Json.createArrayBuilder();
-        for(String s: teams) {
-            jsb.add(s);
+        for(Team t: teams) {
+            JsonArray pitchersJsonArray = makePitchersJsonArray(t.getPitchers());
+            JsonArray hittersJsonArray = makeHittersJsonArray(t.getHitters());
+                       
+            //NOW MAKE THE TEAM JSON OBJECT AND BUILD IT
+            JsonObject teamJsonObject = Json.createObjectBuilder()
+                                       .add(JSON_TEAM, t.getName())
+                                       .add(JSON_OWNER, t.getOwnerName())
+                                       .add(JSON_PITCHERS, pitchersJsonArray)
+                                       .add(JSON_HITTERS, hittersJsonArray)
+                    .build();
+            jsb.add(teamJsonObject);
         }
         JsonArray jA = jsb.build();
         return jA;
@@ -289,6 +267,11 @@ public class JsonDraftFileManager implements DraftFileManager{
         return jso;
     }
 
+    private JsonObject makeOwnerNameJsonObject(String ownerName) {
+        JsonObject jso = Json.createObjectBuilder().add(JSON_OWNER, ownerName)
+                                                    .build();
+        return jso;
+    }
     private JsonArray makeHittersJsonArray(List<Hitter> hitters) {
         JsonArrayBuilder jsb = Json.createArrayBuilder();
         for(Hitter h : hitters) {

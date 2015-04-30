@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Team {
     String teamName;
+    String ownerName;
     List<Pitcher> pitchers;
     List<Hitter> hitters;
     int draftNumber;
@@ -23,8 +24,9 @@ public class Team {
         hitters = new ArrayList<Hitter>();
     }
 
-    public Team(String teamName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public Team(String teamName, String ownerName) {
+        this.teamName = teamName;
+        this.ownerName = ownerName;
     }
     
     public String getName(){
@@ -35,6 +37,13 @@ public class Team {
         this.teamName = teamName;
     }
     
+    public String getOwnerName(){
+        return ownerName;
+    }
+    
+    public void setOwnerName(String ownerName){
+        this.ownerName = ownerName;
+    }
     public int getDraftNumber(){
         return draftNumber;
     }
@@ -55,5 +64,10 @@ public class Team {
     }
     public List<Hitter> getHitters(){
         return hitters;
+    }
+    
+    @Override
+    public String toString(){
+        return teamName;
     }
 }
