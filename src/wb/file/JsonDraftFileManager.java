@@ -79,7 +79,7 @@ public class JsonDraftFileManager implements DraftFileManager{
       
        
        //MAKE A JSON ARRAY FOR THE TEAMS ARRAY
-       List<Team> teams = draftToSave.getTeams();
+       List<Team> teams = draftToSave.getTeams().subList(0, draftToSave.getTeams().size());
        JsonArray fantasyTeamsJsonArray = makeFantasyTeamsJsonArray(teams);
    
        
@@ -88,7 +88,8 @@ public class JsonDraftFileManager implements DraftFileManager{
                                    .add(JSON_NAME, draftToSave.getName())
                                    .add(JSON_TEAMS, fantasyTeamsJsonArray)
                .build();
-   
+       //SAVE IT TO FILE
+       jsonWriter.writeObject(draftJsonObject);
    }
    
    @Override
@@ -268,19 +269,19 @@ public class JsonDraftFileManager implements DraftFileManager{
                                                     .build();
         return jso;
     }
-    private JsonArray makeHittersJsonArray(List<Hitter> hitters) {
+    private JsonArray makeHittersJsonArray(List<Player> hitters) {
         JsonArrayBuilder jsb = Json.createArrayBuilder();
-        for(Hitter h : hitters) {
+        for(Player h : hitters) {
             JsonObjectBuilder jso = Json.createObjectBuilder().add(JSON_TEAM, h.getMLBTeam())
                                                        .add(JSON_LNAME, h.getLastName())
                                                        .add(JSON_FNAME, h.getFirstName())
                                                        .add(JSON_QP, h.getPosition())
-                                                       .add(JSON_AB, h.getAtBats())
-                                                       .add(JSON_R, h.getRuns())
-                                                       .add(JSON_H, h.getHits())
-                                                       .add(JSON_HR, h.getHomeRuns())
-                                                       .add(JSON_RBI, h.getRBI())
-                                                       .add(JSON_SB, h.getStolenBases())
+                                                       .add(JSON_AB, h.getIPAB())
+                                                       .add(JSON_R, h.getERR())
+                                                       .add(JSON_H, h.getWH())
+                                                       .add(JSON_HR, h.getSVHR())
+                                                       .add(JSON_RBI, h.getHRBI())
+                                                       .add(JSON_SB, h.getBBSB())
                                                        .add(JSON_NOTES, h.getNotes())
                                                        .add(JSON_YEAR, h.getYearOfBirth())
                                                        .add(JSON_NATION, h.getNationOfBirth());
@@ -291,19 +292,19 @@ public class JsonDraftFileManager implements DraftFileManager{
         return jA;
     }
 
-    private JsonArray makePitchersJsonArray(List<Pitcher> pitchers) {
+    private JsonArray makePitchersJsonArray(List<Player> pitchers) {
         JsonArrayBuilder jsb = Json.createArrayBuilder();
-        for(Pitcher p: pitchers){
+        for(Player p: pitchers){
             JsonObjectBuilder jso = Json.createObjectBuilder().add(JSON_TEAM, p.getMLBTeam())
                                                        .add(JSON_LNAME, p.getLastName())
                                                        .add(JSON_FNAME, p.getFirstName())
-                                                       .add(JSON_IP, p.getIP())
-                                                       .add(JSON_ER, p.getEarnedRuns())
-                                                       .add(JSON_W, p.getWins())
-                                                       .add(JSON_SV, p.getHits())
-                                                       .add(JSON_H, p.getHits())
-                                                       .add(JSON_BB, p.getWalks())
-                                                       .add(JSON_K, p.getStrikeouts())
+                                                       .add(JSON_IP, p.getIPAB())
+                                                       .add(JSON_ER, p.getERR())
+                                                       .add(JSON_W, p.getWH())
+                                                       .add(JSON_SV, p.getSVHR())
+                                                       .add(JSON_H, p.getHRBI())
+                                                       .add(JSON_BB, p.getBBSB())
+                                                       .add(JSON_K, p.getK())
                                                        .add(JSON_NOTES, p.getNotes())
                                                        .add(JSON_YEAR, p.getYearOfBirth())
                                                        .add(JSON_NATION, p.getNationOfBirth());
