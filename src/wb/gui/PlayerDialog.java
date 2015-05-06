@@ -8,6 +8,7 @@ package wb.gui;
 import java.util.ArrayList;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -16,12 +17,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import static wb.WB_StartupConstants.PATH_FLAGS;
 import static wb.WB_StartupConstants.PATH_PLAYERS;
 import wb.data.Draft;
@@ -30,6 +34,7 @@ import wb.data.Player;
 import wb.data.Team;
 import static wb.gui.WB_GUI.CLASS_HEADING_LABEL;
 import static wb.gui.WB_GUI.CLASS_PROMPT_LABEL;
+import static wb.gui.WB_GUI.CLASS_SUBHEADING_LABEL;
 import static wb.gui.WB_GUI.PRIMARY_STYLE_SHEET;
 
 /**
@@ -70,9 +75,9 @@ public class PlayerDialog extends Stage {
     Label playerName;
     Label playerPosition;
     Label playerTeam;
-    ComboBox fantasyTeams;
+    ComboBox<Team> fantasyTeams;
     Label positionLabel;
-    ComboBox positions;
+    ComboBox<String> positions;
     Label contractLabel;
     ComboBox contracts;
     
@@ -94,8 +99,8 @@ public class PlayerDialog extends Stage {
     public static final String POSITION_PROMPT = "Position: ";
     public static final String CONTRACT_PROMPT = "Contract: ";
     public static final String EDIT_PLAYER_TITLE = "Edit Player";
-    public static final String TEMP_PLAYER_PICTURE = PATH_PLAYERS + "AAA_PhotoMissing.jpg";
-    public static final String TEMP_FLAG_PICTURE = PATH_FLAGS + "USA.png";
+    public static final String TEMP_PLAYER_PICTURE = "file:" + PATH_PLAYERS + "AAA_PhotoMissing.jpg";
+    public static final String TEMP_FLAG_PICTURE = "file:" + PATH_FLAGS + "USA.png";
     
     public PlayerDialog(Stage primaryStage, Draft draft) {
         //MAKE A NEW PLAYER OBJECT
@@ -209,16 +214,49 @@ public class PlayerDialog extends Stage {
        editPane.setVgap(10);
        
        playerPortraitImage = new Image(TEMP_PLAYER_PICTURE);
-       playerPicture.setImage(playerPortraitImage);
+       playerPicture = new ImageView(playerPortraitImage);
        playerFlagImage = new Image(TEMP_FLAG_PICTURE);
-       flagPicture.setImage(playerFlagImage);
+       flagPicture = new ImageView(playerFlagImage);
        playerName = new Label();
-       playerName.getStyleClass().add(CLASS_HEADING_LABEL);
+       playerName.getStyleClass().add(CLASS_SUBHEADING_LABEL);
        playerPosition = new Label();
-       playerPosition.getStyleClass().add(CLASS_HEADING_LABEL);
+       playerPosition.getStyleClass().add(CLASS_SUBHEADING_LABEL);
        playerTeam = new Label(FANTASY_TEAM_PROMPT);
+       playerTeam.getStyleClass().add(CLASS_PROMPT_LABEL);
        fantasyTeams = new ComboBox();
-       loadFantasyTeamsComboBox(draft.getTeams());
+       fantasyTeams.setCellFactory(new Callback<ListView<Team>, ListCell<Team>>() {
+            @Override
+            public ListCell<Team> call(ListView<Team> t) {
+               ListCell cell = new ListCell<Team>() {
+                   @Override
+                   protected void updateItem(Team item, boolean empty){
+                       super.updateItem(item, empty);
+                       if(empty) {
+                           setText("");
+                       } else {
+                           setText(item.getName());
+                       }
+                   }
+               };return cell;
+            }
+        });
+        
+        fantasyTeams.setButtonCell(new ListCell<Team>(){
+        @Override
+        protected void updateItem(Team t, boolean bln) {
+            super.updateItem(t, bln);
+            if(bln){
+                setText("");
+            } else {
+                setText(t.getName());
+            }
+        }
+    });
+       ObservableList<Team> teams = draft.getTeams();
+       //ADD A FREE AGENCY TEAM
+       Team freeAgency = new Team();
+       teams.add(freeAgency);
+       fantasyTeams.setItems(teams);
        fantasyTeams.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
            @Override
            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -245,9 +283,10 @@ public class PlayerDialog extends Stage {
            }
        });
        editPane.add(headingLabel, 0, 0, 2, 1);
-       editPane.add(playerPicture, 0, 1, 1, 1);
-       editPane.add(playerName, 1, 3, 1, 1);
-       editPane.add(playerPosition, 1, 5, 1, 1);
+       editPane.add(playerPicture, 0, 1, 1, 4);
+       editPane.add(flagPicture, 1, 1, 1, 1);
+       editPane.add(playerName, 1, 2, 1, 1);
+       editPane.add(playerPosition, 1, 4, 1, 1);
        editPane.add(playerTeam, 0, 6, 1, 1);
        editPane.add(fantasyTeams, 1, 6, 1, 1);
        editPane.add(positionLabel, 0, 7, 1, 1);
@@ -290,12 +329,11 @@ public class PlayerDialog extends Stage {
         playerPosition.setText(player.getPosition());
         
          //ADD THE IMAGES TO THE EDIT PANE
-        playerPortraitImage = new Image(PATH_PLAYERS + player.getImageFilePath());
+        playerPortraitImage = new Image("file:" + PATH_PLAYERS + player.getImageFilePath());
         playerPicture.setImage(playerPortraitImage);
-        playerFlagImage = new Image(PATH_FLAGS + player.getNationOfBirth() + ".png");
+        playerFlagImage = new Image("file:" + PATH_FLAGS + player.getNationOfBirth() + ".png");
         flagPicture.setImage(playerFlagImage);
         
-        fantasyTeams.getSelectionModel().select(player.getFantasyTeam());
         String[] playerPositions = player.getPosition().split("_");
         positions.getSelectionModel().select(playerPositions[0]);
     }
@@ -303,6 +341,15 @@ public class PlayerDialog extends Stage {
     public boolean wasCompleteSelected() {
         return selection.equals(COMPLETE);
     }
+    
+    public Team getSelectedTeam(){
+        return fantasyTeams.getSelectionModel().getSelectedItem();
+    }
+    
+    public String getSelectedPosition(){
+        return positions.getSelectionModel().getSelectedItem();
+    }
+    
     public void showEditLectureDialog(Player playerToEdit){
         setTitle(EDIT_PLAYER_TITLE);
         
@@ -311,7 +358,17 @@ public class PlayerDialog extends Stage {
         //LOAD THE PLAYER INTO OUR LOCAL OBJECT
         player.setFirstName(playerToEdit.getFirstName());
         player.setLastName(playerToEdit.getLastName());
+        player.setYearOfBirth(playerToEdit.getYearOfBirth());
         player.setPosition(playerToEdit.getPosition());
+        player.setMLBTeam(playerToEdit.getMLBTeam());
+        player.setIPAB(playerToEdit.getIPAB());
+        player.setERR(playerToEdit.getERR());
+        player.setWH(playerToEdit.getWH());
+        player.setSVHR(playerToEdit.getSVHR());
+        player.setHRBI(playerToEdit.getHRBI());
+        player.setBBSB(playerToEdit.getBBSB());
+        player.setK(playerToEdit.getK());
+        player.setNationOfBirth(playerToEdit.getNationOfBirth());
         player.setNotes(playerToEdit.getNotes());
         
         
@@ -327,9 +384,6 @@ public class PlayerDialog extends Stage {
         }
     }
     
-    private void loadFantasyTeamsComboBox(ArrayList<Team> teams){
-        for(Team t: teams){
-            fantasyTeams.getItems().add(t.getName());
-        }
-    }
 }
+    
+    

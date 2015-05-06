@@ -1,4 +1,4 @@
-/*
+    /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -243,6 +243,8 @@ public class WB_GUI implements DraftDataView{
     static final String FIRST_BASE = "1B";
     static final String SECOND_BASE = "2B";
     static final String THIRD_BASE = "3B";
+    static final String CI = "CI";
+    static final String MI = "MI";
     static final String SHORTSTOP = "SS";
     static final String OUTFIELDER = "OF";
     static final String U = "U";
@@ -267,6 +269,7 @@ public class WB_GUI implements DraftDataView{
     //DIALOGS
     MessageDialog messageDialog;
     YesNoCancelDialog yesNoCancelDialog;
+    PlayerDialog playerDialog;
     
     public WB_GUI(Stage initPrimaryStage) {
         primaryStage = initPrimaryStage;
@@ -377,7 +380,7 @@ public class WB_GUI implements DraftDataView{
         Team teamToShow = selectTeamComboBox.getSelectionModel().getSelectedItem();
         ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
         fantasyTeamPlayers.addAll(teamToShow.getPitchers());
-        fantasyTeamPlayers.addAll(teamToShow.getHitters());
+        //fantasyTeamPlayers.addAll(teamToShow.getHitters());
         fantasyTable.setItems(fantasyTeamPlayers);
     }
     
@@ -388,6 +391,7 @@ public class WB_GUI implements DraftDataView{
     private void initDialogs() {
         messageDialog = new MessageDialog(primaryStage, CLOSE_BUTTON_LABEL);
         yesNoCancelDialog = new YesNoCancelDialog(primaryStage);
+        playerDialog = new PlayerDialog(primaryStage, dataManager.getDraft());
     }
     
     private void initToolbars() {
@@ -555,9 +559,11 @@ public class WB_GUI implements DraftDataView{
        secondBaseButton = initGridRadioButton(positionSelectionPane, SECOND_BASE, playerPositionsGroup, 9, 0, 1, 1); //new RadioButton("2B");
        thirdBaseButton = initGridRadioButton(positionSelectionPane, THIRD_BASE, playerPositionsGroup, 12, 0, 1, 1);
        ssButton = initGridRadioButton(positionSelectionPane, SHORTSTOP, playerPositionsGroup, 15, 0, 1, 1);//new RadioButton("SS");
-       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 18, 0, 1, 1);//new RadioButton("OF");
-       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 21, 0, 1, 1);//new RadioButton("U");
-       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 24, 0, 1, 1);//new RadioButton("P");
+       ciButton = initGridRadioButton(positionSelectionPane, CI, playerPositionsGroup, 18, 0, 1, 1);
+       miButton = initGridRadioButton(positionSelectionPane, MI, playerPositionsGroup, 21, 0, 1, 1);
+       ofButton = initGridRadioButton(positionSelectionPane, OUTFIELDER, playerPositionsGroup, 24, 0, 1, 1);//new RadioButton("OF");
+       uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 27, 0, 1, 1);//new RadioButton("U");
+       pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 30, 0, 1, 1);//new RadioButton("P");
        allButton.setSelected(true);
        
        playersWorkspaceSplitPane = new SplitPane();
@@ -685,6 +691,7 @@ public class WB_GUI implements DraftDataView{
             }
         }
     });
+        selectTeamComboBox.setItems(dataManager.getDraft().getTeams());
         
         lineupButtonsPane.getChildren().add(selectTeamComboBox);
         
@@ -707,6 +714,21 @@ public class WB_GUI implements DraftDataView{
        fantasyHRBIColumn = new TableColumn(COL_HRBI);
        fantasyBBSBColumn = new TableColumn(COL_BBSB);
        fantasyKColumn = new TableColumn(COL_K);
+       
+        //LINK COLUMNS TO DATA
+       fantasyFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
+       fantasyLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
+       fantasyProTeamColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("MLBTeam"));
+       fantasyPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
+       fantasyYearOfBirthColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("yearOfBirth"));
+       fantasyIPABColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("IPAB"));
+       fantasyERRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("ERR"));
+       fantasyWHColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("WH"));
+       fantasySVHRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SVHR"));
+       fantasyHRBIColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("HRBI"));
+       fantasyBBSBColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BBSB"));
+       fantasyKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("K"));
+       
        
        fantasyTable.getColumns().add(fantasyFirstNameColumn);
        fantasyTable.getColumns().add(fantasyLastNameColumn);
@@ -778,7 +800,7 @@ public class WB_GUI implements DraftDataView{
             screenController.handleScreenChangeRequest(this, MLB_SCREEN);
         });
         //NOW THE PLAYERS SCREEN
-        playerController = new PlayerController();
+        playerController = new PlayerController(playerDialog);
         addPlayerButton.setOnAction(e -> {
             playerController.handleAddPlayerRequest(this);
         });
@@ -786,12 +808,20 @@ public class WB_GUI implements DraftDataView{
             playerController.handleRemovePlayerRequest(this);
         });
         
+        //THE PLAYERS TABLE
+        playersTable.setOnMouseClicked(e -> {
+            if(e.getClickCount() == 2) {
+                //OPEN UP THE PLAYER EDITOR
+                Player p = playersTable.getSelectionModel().getSelectedItem();
+                playerController.handleEditPlayerRequest(this, p);
+            }
+        });
         registerToggleGroup(playerPositionsGroup);
         registerSearchBarController(playerSearchBar);
         
         //NOW THE FANTASY TEAMS SCREEN
         //TEXT FIELDS WORK DIFFERENTLY
-        teamsController = new TeamsController();
+        teamsController = new TeamsController(primaryStage, dataManager.getDraft(), messageDialog);
         registerTextFieldController(draftNameTextField);
         addTeamButton.setOnAction(e -> {
             teamsController.handleAddTeamRequest(this);

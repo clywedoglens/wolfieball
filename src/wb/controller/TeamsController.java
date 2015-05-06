@@ -28,7 +28,7 @@ public class TeamsController {
     MessageDialog messageDialog;
     YesNoCancelDialog yesNoCancelDialog;
     
-    public TeamsController(Stage initStage, Draft draft, MessageDialog initMessageDialog){
+    public TeamsController(Stage initStage, Draft draft, MessageDialog initMessageDialog)       {
         ftd = new FantasyTeamDialog(initStage, draft, initMessageDialog);
         enabled = true;
     }

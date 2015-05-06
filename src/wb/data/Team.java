@@ -15,13 +15,14 @@ import java.util.List;
 public class Team {
     String teamName;
     String ownerName;
-    List<Pitcher> pitchers;
-    List<Hitter> hitters;
+    List<Player> pitchers;
+    List<ArrayList<Player>> hitters;
     int draftNumber;
     
     public Team(){
-        pitchers = new ArrayList<Pitcher>();
-        hitters = new ArrayList<Hitter>();
+        pitchers = new ArrayList<Player>();
+        //EACH INDEX WILL SERVE AS A SEPARATE LIST FOR EACH POSITION, LISTED IN THE SPECIFIED ORDER 
+        hitters = new ArrayList<ArrayList<Player>>();
     }
 
     public Team(String teamName, String ownerName) {
@@ -52,17 +53,31 @@ public class Team {
         this.draftNumber = draftNumber;
     }
     
-    public void addPitcher(Pitcher pitcher){
+    public void addPitcher(Player pitcher){
         pitchers.add(pitcher);
     }
-    public List<Pitcher> getPitchers(){
+    public List<Player> getPitchers(){
         return pitchers;
     }
     
-    public void addHitter(Hitter hitter){
-        hitters.add(hitter);
+    public void addHitter(Player hitter, String position){
+        switch(position.toUpperCase()) {
+            case "C" : hitters.get(0).add(hitter);
+                       break;
+            case "1B" : hitters.get(1).add(hitter);
+                        break;
+            case "3B" : hitters.get(2).add(hitter);
+                        break;
+            case "2B" : hitters.get(3).add(hitter);
+                        break;
+            case "SS" : hitters.get(4).add(hitter);
+                        break;
+            case "OF" : hitters.get(5).add(hitter);
+                        break;
+                
+        }
     }
-    public List<Hitter> getHitters(){
+    public List<ArrayList<Player>> getHitters(){
         return hitters;
     }
     

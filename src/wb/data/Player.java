@@ -31,9 +31,7 @@ import javafx.beans.property.StringProperty;
     public StringProperty yearOfBirth;
     public StringProperty nationOfBirth;
     public static final String DEFAULT_NAME = "DEFAULT NAME";
-    public String imageFilePath;
-    public String fantasyTeam;
-    
+    public Team team;
     
     public Player() {
         lastName = new SimpleStringProperty("");
@@ -50,7 +48,7 @@ import javafx.beans.property.StringProperty;
         notes = new SimpleStringProperty("");
         yearOfBirth = new SimpleStringProperty(DEFAULT_NAME);
         nationOfBirth = new SimpleStringProperty("");
-        imageFilePath = firstName.get() + lastName.get() + ".jpg";
+        team = null;
     }
     
     public Player(String lName, String fName, String Team, String year, String nation) {
@@ -181,14 +179,14 @@ import javafx.beans.property.StringProperty;
     }
     
     public String getImageFilePath(){
-        return imageFilePath;
+        return lastName.get() + firstName.get() + ".jpg";
     }
     
-    public void setFantasyTeam(String fantasyTeam){
-        this.fantasyTeam = fantasyTeam;
+    public void setTeam(Team team){
+        this.team = team;
     }
     
-    public String getFantasyTeam(){
-        return fantasyTeam;
+    public Team getTeam(){
+        return team;
     }
 }

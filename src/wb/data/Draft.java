@@ -18,11 +18,11 @@ public class Draft {
     String name;
     int number;
     static int counter;
-    ArrayList<Team> teams;
+    ObservableList<Team> teams;
     ObservableList<Player> allPlayers;
     ArrayList<MLBTeam> mlbTeams;
     public Draft(){
-        teams = new ArrayList();
+        teams = FXCollections.observableArrayList();
         mlbTeams = new ArrayList();
         allPlayers = FXCollections.observableArrayList();
     }
@@ -53,7 +53,7 @@ public class Draft {
         return number;
     }
     
-    public ArrayList<Team> getTeams(){
+    public ObservableList<Team> getTeams(){
         return teams;
     }
     
