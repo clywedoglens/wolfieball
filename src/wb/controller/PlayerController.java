@@ -5,8 +5,10 @@
  */
 package wb.controller;
 
+import java.util.ArrayList;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Toggle;
@@ -17,6 +19,7 @@ import wb.data.Hitter;
 import wb.data.Pitcher;
 import wb.data.Player;
 import wb.data.Team;
+import wb.error.ErrorHandler;
 import wb.gui.PlayerDialog;
 import wb.gui.WB_GUI;
 
@@ -29,11 +32,13 @@ public class PlayerController {
     private DraftDataManager dataManager;
     private boolean enabled;
     ObservableList<Player> tableItems;
+    ErrorHandler eH;
     PlayerDialog pd;
     
     public PlayerController(PlayerDialog initPlayerDialog) {
         enabled = true;
         pd = initPlayerDialog;
+        eH = ErrorHandler.getErrorHandler();
     }
     
     public void enable(boolean enableSetting) {
@@ -46,13 +51,24 @@ public class PlayerController {
         pd.showAddPlayerDialog();
         
         if(pd.wasCompleteSelected()) {
-            Player p = pd.getPlayer();
-            
-            if(p.getPosition().equals("P")){
-                Pitcher pitcher = new Pitcher();
-                Team teamToAdd = p.getTeam();
-                pitcher.setTeam(p.getTeam());
+            ArrayList<CheckBox> positionList = pd.getCheckBoxes();
+            String eligiblePositions = new String();
+            for(CheckBox c: positionList){
+                if(c.isSelected()){
+                    if(c.getUserData().equals("P")){
+                        eligiblePositions = "P_";
+                        break;
+                    }
+                    eligiblePositions += c.getUserData() + "_";
+                }
             }
+            eligiblePositions = eligiblePositions.substring(0, eligiblePositions.length() - 1);
+            Player p = pd.getPlayer();
+            Player pitcher = new Player();
+            pitcher.setMLBTeam(p.getMLBTeam());
+            pitcher.setFirstName(p.getFirstName());
+            pitcher.setPosition(eligiblePositions);              
+            
         }
     }
     
@@ -71,25 +87,34 @@ public class PlayerController {
             Player p = pd.getPlayer();
             //FIND THE ORIGINAL TEAM THE PLAYER WAS IN 
             Team origTeam = new Team();
+            if(p.getTeam().getName().equals("Free Agents") || pd.getSelectedTeam().getName().equals("Free Agents")){
+                if(pd.getSelectedTeam().getName().equals("Free Agents"));
+            }
+            else{
             if(p.getTeam() != null)
-                origTeam = draft.getTeams().get(draft.getTeams().indexOf(p));
+                origTeam = draft.getTeams().get(draft.getTeams().indexOf(p.getTeam()));
             Team newTeam = pd.getSelectedTeam();
             p.setTeam(newTeam);
             //NOW REMOVE THE PLAYER FROM ITS ORIGINAL TEAM
             if(p.getPosition().equalsIgnoreCase("P"))
-                newTeam.getPitchers().add(p);
+                newTeam.addPitcher(p);
             else
-                newTeam.getHitters().add(p);
+                if(newTeam.addHitter(p, pd.getSelectedPosition()))
+                    ;
+                else
+                    eH.handlePositionFullError();
+                    
             if(origTeam != null){
                 if(p.getPosition().equalsIgnoreCase("P")){
                     origTeam.getPitchers().remove(p);
                 }
                 else{
-                    origTeam.getHitters().remove(p);
+                    origTeam.removeHitter(p, pd.getSelectedPosition());
                 }
                 
                 gui.getFileController().markAsEdited(gui);
             }
+        }
         }
        
         
