@@ -23,6 +23,9 @@ public class Draft {
     ArrayList<MLBTeam> mlbTeams;
     public Draft(){
         teams = FXCollections.observableArrayList();
+        Team freeAgency = new Team();
+        freeAgency.setName("Free Agency");
+        teams.add(0, freeAgency);
         mlbTeams = new ArrayList();
         allPlayers = FXCollections.observableArrayList();
     }
@@ -41,6 +44,7 @@ public class Draft {
     
     public void setName(String name){
         this.name = name;
+        teams.get(0).setName(name);
     }
     
     public String getName(){

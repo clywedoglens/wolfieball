@@ -8,6 +8,7 @@ package wb.gui;
 import java.util.ArrayList;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -252,11 +253,7 @@ public class PlayerDialog extends Stage {
             }
         }
     });
-       ObservableList<Team> teams = draft.getTeams();
-       //ADD A FREE AGENCY TEAM
-       Team freeAgency = new Team();
-       teams.add(freeAgency);
-       fantasyTeams.setItems(teams);
+       fantasyTeams.setItems(draft.getTeams());
        fantasyTeams.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
            @Override
            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -334,8 +331,17 @@ public class PlayerDialog extends Stage {
         playerFlagImage = new Image("file:" + PATH_FLAGS + player.getNationOfBirth() + ".png");
         flagPicture.setImage(playerFlagImage);
         
-        String[] playerPositions = player.getPosition().split("_");
-        positions.getSelectionModel().select(playerPositions[0]);
+        ObservableList<String> playerPositions = FXCollections.observableArrayList();
+        String[] playerPositionsStrings = player.getPosition().split("_");
+        playerPositions.addAll(playerPositionsStrings);
+        if(playerPositions.contains("1B") && playerPositions.contains("3B"))
+            playerPositions.add("CI");
+        else if(playerPositions.contains("2B") && playerPositions.contains("SS"))
+            playerPositions.add("MI");   
+        if(playerPositions.size() > 1)
+            playerPositions.add("U");
+        positions.setItems(playerPositions);
+        positions.getSelectionModel().select(playerPositions.get(0));
     }
     
     public boolean wasCompleteSelected() {

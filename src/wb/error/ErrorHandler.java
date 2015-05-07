@@ -7,6 +7,7 @@ package wb.error;
 
 import javafx.stage.Stage;
 import properties_manager.PropertiesManager;
+import static wb.WB_PropertyType.POSITION_FULL_ERROR_MESSAGE;
 import static wb.WB_StartupConstants.CLOSE_BUTTON_LABEL;
 import static wb.WB_StartupConstants.PROPERTIES_FILE_ERROR_MESSAGE;
 import wb.gui.MessageDialog;
@@ -44,6 +45,9 @@ public class ErrorHandler {
         return singleton;
     }
     
+    public void handlePositionFullError() {
+        messageDialog.show(properties.getProperty(POSITION_FULL_ERROR_MESSAGE));
+    }
     public void handlePropertiesFileError() {
         messageDialog.show(properties.getProperty(PROPERTIES_FILE_ERROR_MESSAGE));
     }

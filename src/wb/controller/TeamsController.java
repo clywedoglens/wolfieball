@@ -27,9 +27,11 @@ public class TeamsController {
     FantasyTeamDialog ftd;
     MessageDialog messageDialog;
     YesNoCancelDialog yesNoCancelDialog;
+    ErrorHandler errorHandler;
     
     public TeamsController(Stage initStage, Draft draft, MessageDialog initMessageDialog)       {
         ftd = new FantasyTeamDialog(initStage, draft, initMessageDialog);
+        errorHandler = ErrorHandler.getErrorHandler();
         enabled = true;
     }
     
