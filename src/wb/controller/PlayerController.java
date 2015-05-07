@@ -64,10 +64,10 @@ public class PlayerController {
             }
             eligiblePositions = eligiblePositions.substring(0, eligiblePositions.length() - 1);
             Player p = pd.getPlayer();
-            Player pitcher = new Player();
-            pitcher.setMLBTeam(p.getMLBTeam());
-            pitcher.setFirstName(p.getFirstName());
-            pitcher.setPosition(eligiblePositions);              
+            Player newPlayer = new Player();
+            newPlayer.setMLBTeam(p.getMLBTeam());
+            newPlayer.setFirstName(p.getFirstName());
+            newPlayer.setPosition(eligiblePositions);              
             
         }
     }
