@@ -6,6 +6,8 @@
 package wb.data;
 
 import java.util.ArrayList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -13,13 +15,26 @@ import java.util.ArrayList;
  */
 public class MLBTeam {
     private String name;
-    ArrayList<Player> players;
+    ObservableList<Player> players;
     
-    public MLBTeam(){
-        
+    public MLBTeam(String name){
+        this.name = name;
+        players = FXCollections.observableArrayList();
     }
     
     public String getName(){
         return name;
     }
+    
+    public void setName(String name){
+        this.name = name;
+    }
+    
+    public void addPlayer(Player player){
+        players.add(player);
+    }
+    public ObservableList<Player> getPlayers(){
+        return players;
+    }
+    
 }

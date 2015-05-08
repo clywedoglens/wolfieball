@@ -5,6 +5,8 @@
  */
 package wb.data;
 
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,6 +21,7 @@ import javafx.beans.property.StringProperty;
     public StringProperty lastName;
     public StringProperty firstName;
     public StringProperty mlbTeam;
+    public StringProperty eligiblePosition;
     public StringProperty position;
     public StringProperty ipab;
     public StringProperty err;
@@ -30,6 +33,8 @@ import javafx.beans.property.StringProperty;
     public StringProperty notes;
     public StringProperty yearOfBirth;
     public StringProperty nationOfBirth;
+    public StringProperty contract;
+    public IntegerProperty salary;
     public static final String DEFAULT_NAME = "DEFAULT NAME";
     public Team team;
     
@@ -37,7 +42,7 @@ import javafx.beans.property.StringProperty;
         lastName = new SimpleStringProperty("");
         firstName = new SimpleStringProperty("");
         mlbTeam = new SimpleStringProperty("");
-        position = new SimpleStringProperty("");
+        eligiblePosition = new SimpleStringProperty("");
         ipab = new SimpleStringProperty(DEFAULT_NAME);
         err = new SimpleStringProperty(DEFAULT_NAME);
         wh = new SimpleStringProperty(DEFAULT_NAME);
@@ -48,6 +53,9 @@ import javafx.beans.property.StringProperty;
         notes = new SimpleStringProperty("");
         yearOfBirth = new SimpleStringProperty(DEFAULT_NAME);
         nationOfBirth = new SimpleStringProperty("");
+        contract = new SimpleStringProperty("");
+        salary = new SimpleIntegerProperty(0);
+        position = new SimpleStringProperty("");
         team = null;
     }
     
@@ -55,7 +63,7 @@ import javafx.beans.property.StringProperty;
         lastName = new SimpleStringProperty(lName);
         firstName = new SimpleStringProperty(fName);
         mlbTeam = new SimpleStringProperty(Team);
-        position = new SimpleStringProperty(Team);
+        eligiblePosition = new SimpleStringProperty(Team);
         ipab = new SimpleStringProperty(DEFAULT_NAME);
         err = new SimpleStringProperty(DEFAULT_NAME);
         wh = new SimpleStringProperty(DEFAULT_NAME);
@@ -93,13 +101,20 @@ import javafx.beans.property.StringProperty;
     }
     
     public void setPosition(String initPos){
-        position.set(initPos);
+        eligiblePosition.set(initPos);
     }
     
     public String getPosition(){
+        return eligiblePosition.get();
+    }
+    
+    public String getTeamPosition(){
         return position.get();
     }
     
+    public void setTeamPosition(String initPos){
+        position.set(initPos);
+    }
     public String getIPAB(){
         return ipab.get();
     }

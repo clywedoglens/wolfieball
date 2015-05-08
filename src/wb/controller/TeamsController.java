@@ -5,11 +5,14 @@
  */
 package wb.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.stage.Stage;
 import properties_manager.PropertiesManager;
 import wb.WB_PropertyType;
 import wb.data.Draft;
 import wb.data.DraftDataManager;
+import wb.data.Player;
 import wb.data.Team;
 import wb.error.ErrorHandler;
 import wb.gui.FantasyTeamDialog;
@@ -67,6 +70,22 @@ public class TeamsController {
         
         //IF THE USER SAID YES, WE MUST REMOVE THE TEAM
         if(selection.equals(YesNoCancelDialog.YES)) {
+            //WE MUST MOVE ALL THE PLAYERS TO THE FREE AGENCY TEAM
+            //FIRST THE PITCHERS
+            for(Player p: teamToRemove.getPitchers()){
+                Team freeAgency = gui.getDataManager().getDraft().getTeams().get(0);
+                p.setTeam(freeAgency);
+                freeAgency.addPitcher(p);
+            }
+            //NOW THE HITTERS
+            for(int i = 0; i < teamToRemove.getHitters().size(); i++){
+                for(Player p: teamToRemove.getHitters().get(i)){
+                    Team freeAgency = gui.getDataManager().getDraft().getTeams().get(0);
+                    p.setTeam(freeAgency);
+                    freeAgency.addHitter(p, i);
+                }
+            }
+            //NOW REMOVE THE TEAM FROM THE TEAMS LIST
             gui.getDataManager().getDraft().removeTeam(teamToRemove);
             
             gui.getFileController().markAsEdited(gui);

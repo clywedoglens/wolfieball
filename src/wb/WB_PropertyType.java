@@ -85,6 +85,7 @@ public enum WB_PropertyType {
     
     //MLB TEAMS SCREEN LABELS
     MLB_TEAMS_LABEL,
+    PRO_TEAM_LABEL,
     
     //ERROR DIALOG MESSAGES
     POSITION_FULL_ERROR_MESSAGE,

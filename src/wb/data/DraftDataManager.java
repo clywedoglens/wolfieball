@@ -38,6 +38,9 @@ public class DraftDataManager {
     public void reset() {
         draft.setNumber(DEFAULT_NUM);
         draft.clearTeams();
+        Team freeAgency = new Team();
+        freeAgency.setName("Free Agency");
+        draft.addTeam(freeAgency);
         
         view.reloadDraft(draft);
     }

@@ -6,6 +6,7 @@
 package wb.data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,18 +21,28 @@ public class Draft {
     static int counter;
     ObservableList<Team> teams;
     ObservableList<Player> allPlayers;
-    ArrayList<MLBTeam> mlbTeams;
+    ObservableList<MLBTeam> mlbTeams;
+    HashMap<String, MLBTeam> mlbMap;
     public Draft(){
         teams = FXCollections.observableArrayList();
-        Team freeAgency = new Team();
-        freeAgency.setName("Free Agency");
-        teams.add(0, freeAgency);
-        mlbTeams = new ArrayList();
+        mlbTeams = FXCollections.observableArrayList();
+        mlbMap = new HashMap<>();
+        loadMLBTeams();
         allPlayers = FXCollections.observableArrayList();
     }
     
     public void addPlayer(Player p){
-        allPlayers.add(p);
+       
+        if(p.getMLBTeam().equalsIgnoreCase("TOR")){
+            //DONT ADD IT TO THE LIST
+        }
+        else{
+            allPlayers.add(p);
+            MLBTeam mlb = mlbMap.get(p.getMLBTeam());
+            if(mlb == null)
+                p.setFirstName(p.getFirstName());
+            mlb.addPlayer(p);
+        }
         
     }
     public ObservableList<Player> getAllPlayers(){
@@ -44,7 +55,6 @@ public class Draft {
     
     public void setName(String name){
         this.name = name;
-        teams.get(0).setName(name);
     }
     
     public String getName(){
@@ -61,7 +71,7 @@ public class Draft {
         return teams;
     }
     
-    public ArrayList<MLBTeam> getMLBTeams(){
+    public ObservableList<MLBTeam> getMLBTeams(){
         return mlbTeams;
     }
     public void addTeam(Team team){
@@ -78,4 +88,27 @@ public class Draft {
         return counter;
     }
     
+    private void loadMLBTeams(){
+        ArrayList<String> teamNames= new ArrayList<String>();
+        teamNames.add("ATL");
+        teamNames.add("AZ");
+        teamNames.add("CHC");
+        teamNames.add("CIN");
+        teamNames.add("COL");
+        teamNames.add("LAD");
+        teamNames.add("MIA");
+        teamNames.add("MIL");
+        teamNames.add("NYM");
+        teamNames.add("PHI");
+        teamNames.add("PIT");
+        teamNames.add("SD");
+        teamNames.add("SF");
+        teamNames.add("STL");
+        teamNames.add("WSH");
+        for(String s: teamNames){
+            MLBTeam mlb = new MLBTeam(s);
+            mlbTeams.add(mlb);
+            mlbMap.put(s, mlb);
+        }
+    }
 }

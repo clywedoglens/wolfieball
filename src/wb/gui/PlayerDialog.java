@@ -55,7 +55,7 @@ public class PlayerDialog extends Stage {
     Label lastNameLabel;
     TextField lastNameTextField;
     Label proTeamLabel;
-    ComboBox proTeamsComboBox;
+    ComboBox<MLBTeam> proTeamsComboBox;
     ArrayList<CheckBox> positionList;
     CheckBox catcherCheckBox;
     CheckBox pitcherCheckBox;
@@ -64,8 +64,8 @@ public class PlayerDialog extends Stage {
     CheckBox thirdBaseCheckBox;
     CheckBox shortstopCheckBox;
     CheckBox outfielderCheckBox;
-    Button completeButton;
-    Button cancelButton;
+    Button addCompleteButton;
+    Button addCancelButton;
     
     GridPane editPane;
     Scene editDialogScene;
@@ -81,6 +81,10 @@ public class PlayerDialog extends Stage {
     ComboBox<String> positions;
     Label contractLabel;
     ComboBox contracts;
+    Label salaryLabel;
+    TextField salaryTextField;
+    Button completeButton;
+    Button cancelButton;
     
     //KEEPS TRACK WHICH BUTTON USER PRESSED
     String selection;
@@ -99,6 +103,7 @@ public class PlayerDialog extends Stage {
     public static final String FANTASY_TEAM_PROMPT = "Fantasy Team: ";
     public static final String POSITION_PROMPT = "Position: ";
     public static final String CONTRACT_PROMPT = "Contract: ";
+    public static final String SALARY_PROMPT = "Salary: ";
     public static final String EDIT_PLAYER_TITLE = "Edit Player";
     public static final String TEMP_PLAYER_PICTURE = "file:" + PATH_PLAYERS + "AAA_PhotoMissing.jpg";
     public static final String TEMP_FLAG_PICTURE = "file:" + PATH_FLAGS + "USA.png";
@@ -142,7 +147,34 @@ public class PlayerDialog extends Stage {
        proTeamLabel = new Label(PRO_TEAM_PROMPT);
        proTeamLabel.getStyleClass().add(CLASS_PROMPT_LABEL);
        proTeamsComboBox = new ComboBox();
-       loadProTeamsComboBox(draft.getMLBTeams());
+       proTeamsComboBox.setCellFactory(new Callback<ListView<MLBTeam>, ListCell<MLBTeam>>() {
+            @Override
+            public ListCell<MLBTeam> call(ListView<MLBTeam> t) {
+               ListCell cell = new ListCell<MLBTeam>() {
+                   @Override
+                   protected void updateItem(MLBTeam item, boolean empty){
+                       super.updateItem(item, empty);
+                       if(empty) {
+                           setText("");
+                       } else {
+                           setText(item.getName());
+                       }
+                   }
+               };return cell;
+            }
+        });
+       proTeamsComboBox.setButtonCell(new ListCell<MLBTeam>(){
+        @Override
+        protected void updateItem(MLBTeam t, boolean bln) {
+            super.updateItem(t, bln);
+            if(bln){
+                setText("");
+            } else {
+                setText(t.getName());
+            }
+        }
+    });
+       proTeamsComboBox.setItems(draft.getMLBTeams());
        proTeamsComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
           @Override
           public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -180,30 +212,32 @@ public class PlayerDialog extends Stage {
        outfielderCheckBox.setUserData("OF");
        positionList.add(outfielderCheckBox);
        //THE BUTTONS
-       completeButton = new Button(COMPLETE);
-       cancelButton = new Button(CANCEL);
+       addCompleteButton = new Button(COMPLETE);
+       addCancelButton = new Button(CANCEL);
        
        EventHandler completeCancelHandler = (EventHandler<ActionEvent>) (ActionEvent ae) -> {
            Button sourceButton = (Button) ae.getSource();
            PlayerDialog.this.selection = sourceButton.getText();
            PlayerDialog.this.hide();
        };
-       completeButton.setOnAction(completeCancelHandler);
-       cancelButton.setOnAction(completeCancelHandler);
+       addCompleteButton.setOnAction(completeCancelHandler);
+       addCancelButton.setOnAction(completeCancelHandler);
        
        //ADD EVERYTHING TO THE ADD GRIDPANE
        addPane.add(headingLabel, 0, 0, 2, 1);
-       addPane.add(firstNameLabel, 0, 1, 1, 1);
+       addPane.add(firstNameLabel, 0, 1, 2, 1);
        addPane.add(firstNameTextField, 1, 1, 1, 1);
        addPane.add(lastNameLabel, 0, 2, 1, 1);
        addPane.add(lastNameTextField, 1, 2, 1, 1);
        addPane.add(proTeamLabel, 0, 3, 1, 1);
        addPane.add(proTeamsComboBox, 1, 3, 1, 1);
-       int i = 0;
+       /*int i = 0;
        for(CheckBox c: positionList){
         addPane.add(c , i , 4, 1, 1);
         i++;
-       }
+       }*/
+       addPane.add(addCompleteButton, 0, 4, 1, 1);
+       addPane.add(addCancelButton, 1, 4, 1, 1);
        addDialogScene = new Scene(addPane);
        addDialogScene.getStylesheets().add(PRIMARY_STYLE_SHEET);
        this.setScene(addDialogScene);
@@ -279,6 +313,16 @@ public class PlayerDialog extends Stage {
                
            }
        });
+       salaryLabel = new Label(SALARY_PROMPT);
+       salaryLabel.getStyleClass().add(CLASS_PROMPT_LABEL);
+       salaryTextField = new TextField();
+       
+       //THE BUTTONS
+       completeButton = new Button(COMPLETE);
+       cancelButton = new Button(CANCEL);
+       completeButton.setOnAction(completeCancelHandler);
+       cancelButton.setOnAction(completeCancelHandler);
+       
        editPane.add(headingLabel, 0, 0, 2, 1);
        editPane.add(playerPicture, 0, 1, 1, 4);
        editPane.add(flagPicture, 1, 1, 1, 1);
@@ -290,8 +334,10 @@ public class PlayerDialog extends Stage {
        editPane.add(positions, 1, 7, 1, 1);
        editPane.add(contractLabel, 0, 8, 1, 1);
        editPane.add(contracts, 1, 8, 1, 1);
-       editPane.add(completeButton, 1, 9, 1, 1);
-       editPane.add(cancelButton, 2, 9, 1, 1);
+       editPane.add(salaryLabel, 0, 9, 1, 1);
+       editPane.add(salaryTextField, 1, 9, 1, 1);
+       editPane.add(completeButton, 1, 10, 1, 1);
+       editPane.add(cancelButton, 2, 10, 1, 1);
       
        editDialogScene = new Scene(editPane);
        editDialogScene.getStylesheets().add(PRIMARY_STYLE_SHEET);
@@ -356,6 +402,9 @@ public class PlayerDialog extends Stage {
         return positions.getSelectionModel().getSelectedItem();
     }
     
+    public ArrayList<CheckBox> getCheckBoxes(){
+        return positionList;
+    }
     public void showEditLectureDialog(Player playerToEdit){
         setTitle(EDIT_PLAYER_TITLE);
         
@@ -384,11 +433,7 @@ public class PlayerDialog extends Stage {
         
         this.showAndWait();
     }
-    private void loadProTeamsComboBox(ArrayList<MLBTeam> mlbTeams){
-        for(MLBTeam m: mlbTeams){
-            proTeamsComboBox.getItems().add(m.getName());
-        }
-    }
+    
     
 }
     

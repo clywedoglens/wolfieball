@@ -68,7 +68,7 @@ public class JsonDraftFileManager implements DraftFileManager{
    public void saveDraft(Draft draftToSave) throws IOException {
        //BUILD FILE PATH
        String draftListing = "" + "" + draftToSave.getName();
-       String jsonFilePath = PATH_DRAFTS + SLASH + draftListing + JSON_EXT;
+       String jsonFilePath = PATH_DRAFTS + draftListing + JSON_EXT;
        
        //INITIALIZE WRITER
        OutputStream os = new FileOutputStream(jsonFilePath);

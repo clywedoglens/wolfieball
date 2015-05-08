@@ -50,12 +50,14 @@ import static wb.WB_StartupConstants.CLOSE_BUTTON_LABEL;
 import static wb.WB_StartupConstants.PATH_CSS;
 import static wb.WB_StartupConstants.PATH_IMAGES;
 import wb.controller.FileController;
+import wb.controller.MLBController;
 import wb.controller.PlayerController;
 import wb.controller.ScreenController;
 import wb.controller.TeamsController;
 import wb.data.Draft;
 import wb.data.DraftDataManager;
 import wb.data.DraftDataView;
+import wb.data.MLBTeam;
 import wb.data.Player;
 import wb.data.Team;
 import wb.file.DraftFileManager;
@@ -96,6 +98,9 @@ public class WB_GUI implements DraftDataView{
     
     //THIS HANDLES ALL THE USER INTERACTIONS WITH THE TEAMS SCREEN
     TeamsController teamsController;
+    
+    //THIS HANDLES ALL THE USER INTERACTIONS WITH THE MLB TEAMS SCREEN
+    MLBController mlbController;
     
     //THIS HANDLES THE BOTTOM TOOLBAR TO SWITCH SCREENS
     ScreenController screenController;
@@ -202,18 +207,19 @@ public class WB_GUI implements DraftDataView{
     VBox fantasyTableBox;
     Label startingLineupLabel;
     TableView<Player> fantasyTable;
+    TableColumn fantasyPositionColumn;
     TableColumn fantasyFirstNameColumn;
     TableColumn fantasyLastNameColumn;
     TableColumn fantasyProTeamColumn;
     TableColumn fantasyPositionsColumn;
-    TableColumn fantasyYearOfBirthColumn;
-    TableColumn fantasyIPABColumn;
     TableColumn fantasyERRColumn;
     TableColumn fantasyWHColumn;
     TableColumn fantasySVHRColumn;
     TableColumn fantasyHRBIColumn;
     TableColumn fantasyBBSBColumn;
     TableColumn fantasyKColumn;
+    TableColumn fantasyContractColumn;
+    TableColumn fantasySalaryColumn;
     
     //FANTASY STANDINGS SCREEN WORKSPACE
     VBox standingsTopPane;
@@ -236,6 +242,13 @@ public class WB_GUI implements DraftDataView{
     Label mlbTeamsLabel;
     GridPane mlbLabelPane;
     BorderPane mlbWorkspacePane;
+    Label proTeamLabel;
+    ComboBox<MLBTeam> mlbTeamsComboBox;
+    TableView proTeamsTable;
+    TableColumn mlbFirstNameColumn;
+    TableColumn mlbLastNameColumn;
+    TableColumn mlbPositionsColumn;
+    
     
     //PLAYER POSITIONS
     static final String ALL = "All";
@@ -251,6 +264,7 @@ public class WB_GUI implements DraftDataView{
     static final String PITCHER = "P";
     
     //TABLE COLUMNS
+    static final String COL_POSITION = "Position";
     static final String COL_FIRSTNAME = "First";
     static final String COL_LASTNAME = "Last";
     static final String COL_PROTEAM = "Pro Team";
@@ -265,6 +279,8 @@ public class WB_GUI implements DraftDataView{
     static final String COL_K = "K";
     static final String COL_NOTES = "Notes";
     static final String COL_NATIONOFBIRTH = "Nation of Birth";
+    static final String COL_CONTRACT = "Contract";
+    static final String COL_SALARY = "Salary";
     
     //DIALOGS
     MessageDialog messageDialog;
@@ -380,8 +396,14 @@ public class WB_GUI implements DraftDataView{
         Team teamToShow = selectTeamComboBox.getSelectionModel().getSelectedItem();
         ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
         fantasyTeamPlayers.addAll(teamToShow.getPitchers());
-        //fantasyTeamPlayers.addAll(teamToShow.getHitters());
+        for(ArrayList<Player> a: teamToShow.getHitters())
+            fantasyTeamPlayers.addAll(a);
         fantasyTable.setItems(fantasyTeamPlayers);
+    }
+    
+    public void updateMLBTable(Draft draft) {
+        MLBTeam teamToShow = mlbTeamsComboBox.getSelectionModel().getSelectedItem();
+        proTeamsTable.setItems(teamToShow.getPlayers());
     }
     
     /****************************************************************************/
@@ -687,10 +709,11 @@ public class WB_GUI implements DraftDataView{
             if(bln){
                 setText("");
             } else {
-                setText(t.getName());
+                setText(t.toString());
             }
         }
     });
+        
         selectTeamComboBox.setItems(dataManager.getDraft().getTeams());
         
         lineupButtonsPane.getChildren().add(selectTeamComboBox);
@@ -702,26 +725,26 @@ public class WB_GUI implements DraftDataView{
         fantasyTableBox.getStyleClass().add(CLASS_BORDERED_PANE);
         
         //SETUP TABLE COLUMNS
+       fantasyPositionColumn = new TableColumn(COL_POSITION);
        fantasyFirstNameColumn = new TableColumn(COL_FIRSTNAME);
        fantasyLastNameColumn = new TableColumn(COL_LASTNAME);
        fantasyProTeamColumn = new TableColumn(COL_PROTEAM);
        fantasyPositionsColumn = new TableColumn(COL_POSITIONS);
-       fantasyYearOfBirthColumn = new TableColumn(COL_YEAROFBIRTH);
-       fantasyIPABColumn = new TableColumn(COL_IPAB);
        fantasyERRColumn = new TableColumn(COL_ERR);
        fantasyWHColumn = new TableColumn(COL_WH);
        fantasySVHRColumn = new TableColumn(COL_SVHR);
        fantasyHRBIColumn = new TableColumn(COL_HRBI);
        fantasyBBSBColumn = new TableColumn(COL_BBSB);
        fantasyKColumn = new TableColumn(COL_K);
+       fantasyContractColumn = new TableColumn(COL_CONTRACT);
+       fantasySalaryColumn = new TableColumn(COL_SALARY);
        
         //LINK COLUMNS TO DATA
+       fantasyPositionColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("TeamPosition"));
        fantasyFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
        fantasyLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
        fantasyProTeamColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("MLBTeam"));
        fantasyPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
-       fantasyYearOfBirthColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("yearOfBirth"));
-       fantasyIPABColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("IPAB"));
        fantasyERRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("ERR"));
        fantasyWHColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("WH"));
        fantasySVHRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SVHR"));
@@ -729,20 +752,20 @@ public class WB_GUI implements DraftDataView{
        fantasyBBSBColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BBSB"));
        fantasyKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("K"));
        
-       
+       fantasyTable.getColumns().add(fantasyPositionColumn);
        fantasyTable.getColumns().add(fantasyFirstNameColumn);
        fantasyTable.getColumns().add(fantasyLastNameColumn);
        fantasyTable.getColumns().add(fantasyProTeamColumn);
        fantasyTable.getColumns().add(fantasyPositionsColumn);
-       fantasyTable.getColumns().add(fantasyYearOfBirthColumn);
-       fantasyTable.getColumns().add(fantasyIPABColumn);
        fantasyTable.getColumns().add(fantasyERRColumn);
        fantasyTable.getColumns().add(fantasyWHColumn);
        fantasyTable.getColumns().add(fantasySVHRColumn);
        fantasyTable.getColumns().add(fantasyHRBIColumn);
        fantasyTable.getColumns().add(fantasyBBSBColumn);
        fantasyTable.getColumns().add(fantasyKColumn);
-        
+       fantasyTable.getColumns().add(fantasyContractColumn);
+       fantasyTable.getColumns().add(fantasySalaryColumn);
+       
         teamsCenterPane.getChildren().add(lineupButtonsPane);
         teamsCenterPane.getChildren().add(lineupPane);
         teamsCenterPane.getChildren().add(fantasyTableBox);
@@ -756,11 +779,66 @@ public class WB_GUI implements DraftDataView{
     private void initDraftScreenControls(){
         draftCenterPane = new VBox();
         draftCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+        
     }
     
     private void initMLBTeamsScreenControls(){
          mlbCenterPane = new VBox(); 
          mlbCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+         proTeamLabel = initChildLabel(mlbCenterPane, WB_PropertyType.PRO_TEAM_LABEL, CLASS_PROMPT_LABEL);
+         
+         mlbTeamsComboBox = new ComboBox();
+         mlbTeamsComboBox.setCellFactory(new Callback<ListView<MLBTeam>, ListCell<MLBTeam>>() {
+            @Override
+            public ListCell<MLBTeam> call(ListView<MLBTeam> t) {
+               ListCell cell = new ListCell<MLBTeam>() {
+                   @Override
+                   protected void updateItem(MLBTeam item, boolean empty){
+                       super.updateItem(item, empty);
+                       if(empty) {
+                           setText("");
+                       } else {
+                           setText(item.getName());
+                       }
+                   }
+               };return cell;
+            }
+        });
+         mlbTeamsComboBox.setButtonCell(new ListCell<MLBTeam>(){
+        @Override
+        protected void updateItem(MLBTeam t, boolean bln) {
+            super.updateItem(t, bln);
+            if(bln){
+                setText("");
+            } else {
+                setText(t.getName());
+            }
+        }
+    });
+         mlbTeamsComboBox.setItems(dataManager.getDraft().getMLBTeams());
+         mlbTeamsComboBox.getSelectionModel().select(dataManager.getDraft().getMLBTeams().get(0));
+         mlbCenterPane.getChildren().add(mlbTeamsComboBox);
+         
+         proTeamsTable = new TableView();
+         mlbCenterPane.getChildren().add(proTeamsTable);
+         
+         mlbFirstNameColumn = new TableColumn(COL_FIRSTNAME);
+         mlbLastNameColumn = new TableColumn(COL_LASTNAME);
+         mlbPositionsColumn = new TableColumn(COL_POSITIONS);
+         
+         mlbFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
+         mlbLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
+         mlbPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
+         
+         proTeamsTable.getColumns().add(mlbFirstNameColumn);
+         proTeamsTable.getColumns().add(mlbLastNameColumn);
+         proTeamsTable.getColumns().add(mlbPositionsColumn);
+         
+         proTeamsTable.setItems(dataManager.getDraft().getMLBTeams().get(0).getPlayers());
+         
+         
+         
+         
     }
 
     private void initEventHandlers() throws IOException {
@@ -835,6 +913,12 @@ public class WB_GUI implements DraftDataView{
         });
         selectTeamComboBox.setOnAction(e -> {
             teamsController.handleDraftChangeRequest(this);
+        });
+        
+        //NOW THE MLB TEAMS SCREEN
+        mlbController = new MLBController();
+        mlbTeamsComboBox.setOnAction(e -> {
+            mlbController.handleTeamSelectRequest(this);
         });
         
         
