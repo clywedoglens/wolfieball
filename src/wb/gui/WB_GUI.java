@@ -49,10 +49,12 @@ import wb.WB_PropertyType;
 import static wb.WB_StartupConstants.CLOSE_BUTTON_LABEL;
 import static wb.WB_StartupConstants.PATH_CSS;
 import static wb.WB_StartupConstants.PATH_IMAGES;
+import wb.controller.DraftEditsController;
 import wb.controller.FileController;
 import wb.controller.MLBController;
 import wb.controller.PlayerController;
 import wb.controller.ScreenController;
+import wb.controller.StandingsController;
 import wb.controller.TeamsController;
 import wb.data.Draft;
 import wb.data.DraftDataManager;
@@ -68,7 +70,7 @@ import wb.file.DraftSiteExporter;
  * @author George
  */
 public class WB_GUI implements DraftDataView{
-    
+
     static final String PRIMARY_STYLE_SHEET = PATH_CSS + "wb_style.css";
     static final String CLASS_GRAY_PANE = "gray_pane";
     static final String CLASS_BORDERED_PANE = "bordered_pane";
@@ -80,42 +82,48 @@ public class WB_GUI implements DraftDataView{
     static final int LARGE_TEXT_FIELD_LENGTH = 20;
     static final int MEDIUM_TEXT_FIELD_LENGTH = 12;
     static final int SMALL_TEXT_FIELD_LENGTH = 5;
-    
+
     //MANAGES THE APPLICATION'S DATA
     DraftDataManager dataManager;
-    
+
     //MANAGES COURSE FILE I/O
     DraftFileManager draftFileManager;
-    
+
     //MANAGES EXPORTING THE DRAFT
     DraftSiteExporter draftExporter;
-    
+
     //FILE MANAGER
     FileController fileController;
-    
+
     //THE FOLLOWING HANDLES ALL THE USER INTERACTIONS WITH ALL THE CONTROLS
     PlayerController playerController;
-    
+
     //THIS HANDLES ALL THE USER INTERACTIONS WITH THE TEAMS SCREEN
     TeamsController teamsController;
-    
+
+    //THIS HANDLES ALL THE USER INTERACTIONS WITH THE STANDINGS SCREEN
+    StandingsController standingsController;
+
+    //THIS HANDLES ALL THE USER INTERACTIONS WITH THE DRAFT SCREEN
+    DraftEditsController draftController;
+
     //THIS HANDLES ALL THE USER INTERACTIONS WITH THE MLB TEAMS SCREEN
     MLBController mlbController;
-    
+
     //THIS HANDLES THE BOTTOM TOOLBAR TO SWITCH SCREENS
     ScreenController screenController;
-    
+
     //APPLICATION WINDOW
     Stage primaryStage;
-    
+
     //OUR MAIN WINDOW
     Scene primaryScene;
-    
+
     //PANE THAT ORGANIZES THE BIG PICTURE CONTAINERS
     BorderPane wbPane;
-    
+
     ScrollPane workspaceScrollPane;
-    
+
     //FILE TOOLBAR
     FlowPane fileToolbarPane;
     Button newDraftButton;
@@ -123,7 +131,7 @@ public class WB_GUI implements DraftDataView{
     Button saveDraftButton;
     Button exportDraftButton;
     Button exitButton;
-    
+
     //SCREEN SELECTION TOOLBAR
     FlowPane screenToolbarPane;
     Button fantasyTeamsButton;
@@ -131,7 +139,7 @@ public class WB_GUI implements DraftDataView{
     Button teamsStandingsButton;
     Button draftSummaryButton;
     Button mlbTeamsButton;
-    
+
     //SCREEN STRINGS
     static String TEAMS_SCREEN = "teams screen";
     static String PLAYER_SCREEN = "player screen";
@@ -140,9 +148,9 @@ public class WB_GUI implements DraftDataView{
     static String MLB_SCREEN = "mlb screen";
     //ORGANIZE WORKSPACE COMPONENTS USING A BORDER PANE
     boolean workspaceActivated;
-    
+
     HashMap<String,Pane> workspacePanes;
-    
+
     //THIS WILL BE THE WORKSPACE FOR THE PLAYERS SCREEN
     //WHICH SHOULD CONTAIN A GRID PANE WITH A LABEL, RADIO BUTTON CONTROLS,
     //SEARCH LABEL, SEARCH BAR AND A TABLE
@@ -188,7 +196,7 @@ public class WB_GUI implements DraftDataView{
     TableColumn playerKColumn;
     TableColumn playerNotesColumn;
     TableColumn playerNationOfBirthColumn;
-    
+
     //FANTASY TEAMS SCREEN WORKSPACE
     VBox teamsTopPane;
     VBox teamsCenterPane;
@@ -220,22 +228,38 @@ public class WB_GUI implements DraftDataView{
     TableColumn fantasyKColumn;
     TableColumn fantasyContractColumn;
     TableColumn fantasySalaryColumn;
-    
+
     //FANTASY STANDINGS SCREEN WORKSPACE
     VBox standingsTopPane;
     VBox standingsCenterPane;
     Label fantasyStandingsLabel;
     GridPane standingsLabelPane;
     BorderPane standingsWorkspacePane;
-    
+    TableView standingsTable;
+    TableColumn standingsNameColumn;
+    TableColumn standingsPlayersColumn;
+    TableColumn standingsMoneyLeftColumn;
+    TableColumn standingsMoneyPPColumn;
+    TableColumn standingsRunsColumn;
+    TableColumn standingsHomeRunsColumn;
+    TableColumn standingsRBIColumn;
+    TableColumn standingsSBColumn;
+    TableColumn standingsBAColumn;
+    TableColumn standingsWinsColumn;
+    TableColumn standingsSavesColumn;
+    TableColumn standingsKColumn;
+    TableColumn standingsERAColumn;
+    TableColumn standingsWHIPColumn;
+    TableColumn standingsPointsColumn;
+
     //DRAFT SUMMARY SCREEN WORKSPACE
     VBox draftTopPane;
     VBox draftCenterPane;
     Label draftSummaryLabel;
     GridPane draftLabelPane;
     BorderPane draftWorkspacePane;
-    
-    
+
+
     //MLB TEAMS SCREEN WORKSPACE
     VBox mlbTopPane;
     VBox mlbCenterPane;
@@ -248,8 +272,8 @@ public class WB_GUI implements DraftDataView{
     TableColumn mlbFirstNameColumn;
     TableColumn mlbLastNameColumn;
     TableColumn mlbPositionsColumn;
-    
-    
+
+
     //PLAYER POSITIONS
     static final String ALL = "All";
     static final String CATCHER = "C";
@@ -262,7 +286,7 @@ public class WB_GUI implements DraftDataView{
     static final String OUTFIELDER = "OF";
     static final String U = "U";
     static final String PITCHER = "P";
-    
+
     //TABLE COLUMNS
     static final String COL_POSITION = "Position";
     static final String COL_FIRSTNAME = "First";
@@ -282,47 +306,64 @@ public class WB_GUI implements DraftDataView{
     static final String COL_CONTRACT = "Contract";
     static final String COL_SALARY = "Salary";
     
+    //STANDINGS TABLE COLUMNS
+    static final String COL_TEAM = "Team Name";
+    static final String COL_PLAYERS = "Players Needed";
+    static final String COL_MONEYLEFT = "$ Left";
+    static final String COL_MONEYPP ="$ PP";
+    static final String COL_R = "R";
+    static final String COL_HR = "HR";
+    static final String COL_RBI = "RBI";
+    static final String COL_SB = "SB";
+    static final String COL_BA = "BA";
+    static final String COL_W = "W";
+    static final String COL_SV = "SV";
+    static final String COL_ERA = "ERA";
+    static final String COL_WHIP = "WHIP";
+    static final String COL_POINTS = "Total Points";
+    
+
     //DIALOGS
     MessageDialog messageDialog;
     YesNoCancelDialog yesNoCancelDialog;
     PlayerDialog playerDialog;
-    
+
     public WB_GUI(Stage initPrimaryStage) {
         primaryStage = initPrimaryStage;
     }
-    
+
     public DraftDataManager getDataManager() {
         return dataManager;
     }
-    
+
     public FileController getFileController() {
         return fileController;
     }
-    
+
     public DraftFileManager getDraftFileManager() {
         return draftFileManager;
     }
-    
+
     public DraftSiteExporter getDraftExporter() {
         return draftExporter;
     }
-    
+
     public Stage getWindow() {
         return primaryStage;
     }
-    
+
     public MessageDialog getMessageDialog() {
         return messageDialog;
     }
-    
+
     public YesNoCancelDialog getYesNoCancelDialog() {
         return yesNoCancelDialog;
     }
-    
+
     public void setDataManager(DraftDataManager initDataManager) {
         dataManager = initDataManager;
     }
-    
+
     public void setDraftFileManager(DraftFileManager initDraftFileManager) {
         draftFileManager = initDraftFileManager;
     }
@@ -334,7 +375,7 @@ public class WB_GUI implements DraftDataView{
     public void initGUI(String windowTitle) throws IOException {
         // INIT THE DIALOGS
         initDialogs();
-        
+
         // INIT THE TOOLBAR
         initToolbars();
 
@@ -348,7 +389,7 @@ public class WB_GUI implements DraftDataView{
         // AND FINALLY START UP THE WINDOW (WITHOUT THE WORKSPACE)
         initWindow(windowTitle);
     }
-    
+
     public void activateWorkspace() {
         if(!workspaceActivated) {
             //PUT THE MAIN WORKSPACE IN THE GUI WHEN A NEW DRAFT STARTS
@@ -361,15 +402,15 @@ public class WB_GUI implements DraftDataView{
         if( !workspaceActivated) {
             activateWorkspace();
         }
-        
-        
+
+
     }
-    
+
     public void updateToolbarControls(boolean saved) {
         //THIS TOGGLES WITH WHETHER THE CURRENT DRAFT
         // HAS BEEN SAVED OR NOT
         saveDraftButton.setDisable(saved);
-        
+
         //ALL THE OTHER BUTTONS ARE ALWAYS ENABLED
         //ONCE EDITING THAT FIRST DRAFT BEGINS
         loadDraftButton.setDisable(false);
@@ -379,18 +420,18 @@ public class WB_GUI implements DraftDataView{
         teamsStandingsButton.setDisable(false);
         draftSummaryButton.setDisable(false);
         mlbTeamsButton.setDisable(false);
-        
-        
+
+
     }
-    
+
     public void changeScreen(String screen) {
-        
+
         workspaceActivated = false;
         BorderPane newPane = (BorderPane) workspacePanes.get(screen);
         workspaceScrollPane.setContent(newPane);
         workspaceActivated = true;
     }
-    
+
     public void updateDraftInfo(Draft draft) {
         draft.setName(draftNameTextField.getText());
         Team teamToShow = selectTeamComboBox.getSelectionModel().getSelectedItem();
@@ -400,179 +441,179 @@ public class WB_GUI implements DraftDataView{
             fantasyTeamPlayers.addAll(a);
         fantasyTable.setItems(fantasyTeamPlayers);
     }
-    
+
     public void updateMLBTable(Draft draft) {
         MLBTeam teamToShow = mlbTeamsComboBox.getSelectionModel().getSelectedItem();
         proTeamsTable.setItems(teamToShow.getPlayers());
     }
-    
+
     /****************************************************************************/
     /* BELOW ARE ALL THE PRIVATE HELPER METHODS WE USE FOR INITIALIZING OUR GUI */
     /****************************************************************************/
-    
+
     private void initDialogs() {
         messageDialog = new MessageDialog(primaryStage, CLOSE_BUTTON_LABEL);
         yesNoCancelDialog = new YesNoCancelDialog(primaryStage);
         playerDialog = new PlayerDialog(primaryStage, dataManager.getDraft());
     }
-    
+
     private void initToolbars() {
         fileToolbarPane = new FlowPane();
-        
+
         newDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.NEW_DRAFT_ICON, WB_PropertyType.NEW_DRAFT_TOOLTIP, false);
         loadDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.LOAD_DRAFT_ICON, WB_PropertyType.LOAD_DRAFT_TOOLTIP, false);
         saveDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.SAVE_DRAFT_ICON, WB_PropertyType.SAVE_DRAFT_TOOLTIP, true);
         exportDraftButton = initChildButton(fileToolbarPane, WB_PropertyType.EXPORT_DRAFT_ICON, WB_PropertyType.EXPORT_DRAFT_TOOLTIP, true);
         exitButton = initChildButton(fileToolbarPane, WB_PropertyType.EXIT_ICON, WB_PropertyType.EXIT_TOOLTIP, false);
-        
+
         screenToolbarPane = new FlowPane();
-        
+
         fantasyTeamsButton = initChildButton(screenToolbarPane, WB_PropertyType.TEAMS_SCREEN_ICON, WB_PropertyType.TEAMS_SCREEN_TOOLTIP, true);
         playersButton = initChildButton(screenToolbarPane, WB_PropertyType.PLAYERS_SCREEN_ICON, WB_PropertyType.PLAYERS_SCREEN_TOOLTIP, true);
         teamsStandingsButton = initChildButton(screenToolbarPane, WB_PropertyType.STANDINGS_SCREEN_ICON, WB_PropertyType.STANDINGS_SCREEN_TOOLTIP, true);
         draftSummaryButton = initChildButton(screenToolbarPane, WB_PropertyType.DRAFT_SCREEN_ICON, WB_PropertyType.DRAFT_SCREEN_TOOLTIP, true);
         mlbTeamsButton = initChildButton(screenToolbarPane, WB_PropertyType.MLBTEAMS_SCREEN_ICON, WB_PropertyType.MLBTEAMS_SCREEN_TOOLTIP, true);
-        
+
     }
-    
+
     private void initWindow(String windowTitle) {
         //WINDOW TITLE
         primaryStage.setTitle(windowTitle);
-        
+
         //SIZE OF SCREEN
         Screen screen = Screen.getPrimary();
         Rectangle2D bounds = screen.getVisualBounds();
-        
-        
+
+
         // AND USE IT TO SIZE THE WINDOW
         primaryStage.setX(bounds.getMinX());
         primaryStage.setY(bounds.getMinY());
         primaryStage.setWidth(bounds.getWidth());
         primaryStage.setHeight(bounds.getHeight());
-        
+
         wbPane = new BorderPane();
         wbPane.setTop(fileToolbarPane);
         wbPane.setBottom(screenToolbarPane);
         primaryScene = new Scene(wbPane);
-        
+
         // NOW TIE THE SCENE TO THE WINDOW, SELECT THE STYLESHEET
         // WE'LL USE TO STYLIZE OUR GUI CONTROLS, AND OPEN THE WINDOW
         primaryScene.getStylesheets().add(PRIMARY_STYLE_SHEET);
         primaryStage.setScene(primaryScene);
         primaryStage.show();
     }
-    
+
     private void initWorkspace() throws IOException {
-        
-        
-        
+
+
+
         initTopWorkspaces();
-        
+
         initPlayersScreenControls();
-        
+
         initFantasyTeamsScreenControls();
-        
+
         initStandingsScreenControls();
-        
+
         initDraftScreenControls();
-        
+
         initMLBTeamsScreenControls();
-        
+
         teamsWorkspacePane = new BorderPane();
         playersWorkspacePane = new BorderPane();
         standingsWorkspacePane = new BorderPane();
         draftWorkspacePane = new BorderPane();
         mlbWorkspacePane = new BorderPane();
-        
+
         workspacePanes = new HashMap<String, Pane>();
         workspacePanes.put(TEAMS_SCREEN, teamsWorkspacePane);
         workspacePanes.put(PLAYER_SCREEN, playersWorkspacePane);
         workspacePanes.put(STANDINGS_SCREEN, standingsWorkspacePane);
         workspacePanes.put(DRAFT_SCREEN, draftWorkspacePane);
         workspacePanes.put(MLB_SCREEN, mlbWorkspacePane);
-        
+
         teamsWorkspacePane.setTop(teamsTopPane);
         playersWorkspacePane.setTop(playersTopPane);
         standingsWorkspacePane.setTop(standingsTopPane);
         draftWorkspacePane.setTop(draftTopPane);
         mlbWorkspacePane.setTop(mlbTopPane);
-        
+
         teamsWorkspacePane.setCenter(teamsCenterPane);
         teamsWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
-        
+
         playersWorkspacePane.setCenter(playersCenterPane);
         playersWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
-        
+
         standingsWorkspacePane.setCenter(standingsCenterPane);
         standingsWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
-        
+
         draftWorkspacePane.setCenter(draftCenterPane);
         draftWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
-        
+
         mlbWorkspacePane.setCenter(mlbCenterPane);
         mlbWorkspacePane.getStyleClass().add(CLASS_BORDERED_PANE);
-        
+
         workspaceScrollPane = new ScrollPane();
         workspaceScrollPane.setContent(teamsWorkspacePane);
         workspaceScrollPane.setFitToWidth(true);
         workspaceScrollPane.setFitToHeight(true);
         workspaceActivated = false;
-        
-        
+
+
     }
-    
+
     private void initTopWorkspaces(){
-        
-        
-     
+
+
+
         playersTopPane = new VBox();
-        
+
         playersTopPane.getStyleClass().add(CLASS_GRAY_PANE);
         topPlayersLabelPane = new GridPane();
         playersHeadingLabel = initGridLabel(topPlayersLabelPane, WB_PropertyType.PLAYER_AVAILABLE_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
-        
+
         playersTopPane.getChildren().add(topPlayersLabelPane);
-        
+
         teamsTopPane = new VBox();
         topTeamsLabelPane = new GridPane();
         teamsTopPane.getStyleClass().add(CLASS_GRAY_PANE);
         fantasyTeamsLabel = initGridLabel(topTeamsLabelPane, WB_PropertyType.FANTASY_TEAMS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
         teamsTopPane.getChildren().add(topTeamsLabelPane);
-        
+
         standingsTopPane = new VBox();
         standingsLabelPane = new GridPane();
         fantasyStandingsLabel = initGridLabel(standingsLabelPane, WB_PropertyType.FANTASY_STANDINGS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
         standingsTopPane.getStyleClass().add(CLASS_GRAY_PANE);
-        standingsTopPane.getChildren().add(standingsLabelPane); 
-        
-              
+        standingsTopPane.getChildren().add(standingsLabelPane);
+
+
         draftTopPane = new VBox();
         draftLabelPane = new GridPane();
         draftSummaryLabel = initGridLabel(draftLabelPane, WB_PropertyType.DRAFT_SUMMARY_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
         draftTopPane.getStyleClass().add(CLASS_GRAY_PANE);
         draftTopPane.getChildren().add(draftLabelPane);
-        
-        
-        
+
+
+
         mlbTopPane = new VBox();
         mlbLabelPane = new GridPane();
         mlbTeamsLabel = initGridLabel(mlbLabelPane, WB_PropertyType.MLB_TEAMS_LABEL, CLASS_HEADING_LABEL, 0, 0, 4, 1);
         mlbTopPane.getStyleClass().add(CLASS_GRAY_PANE);
         mlbTopPane.getChildren().add(mlbLabelPane);
-        
-        
-     
+
+
+
     }
-    
- 
+
+
     private void initPlayersScreenControls() {
        playerSearchPane = new GridPane();
-        
+
        addPlayerButton = initGridButton(playerSearchPane, WB_PropertyType.ADD_PLAYER_ICON, WB_PropertyType.ADD_PLAYER_TOOLTIP, 0, 0, 1, 1, false);
        removePlayerButton = initGridButton(playerSearchPane, WB_PropertyType.REMOVE_PLAYER_ICON, WB_PropertyType.REMOVE_PLAYER_TOOLTIP, 1, 0, 1, 1, false);
        playerSearchLabel = initGridLabel(playerSearchPane, WB_PropertyType.PLAYER_SEARCH_LABEL, CLASS_SUBHEADING_LABEL, 0, 1, 1, 1);
        playerSearchBar = initGridTextField(playerSearchPane, MEDIUM_TEXT_FIELD_LENGTH, EMPTY_TEXT, true, 1, 1, 1, 1);
-       
+
        positionSelectionPane = new GridPane();
        playerPositionsGroup = new ToggleGroup();
        allButton = initGridRadioButton(positionSelectionPane, ALL, playerPositionsGroup, 0, 0, 1, 1);//new RadioButton("All");
@@ -587,25 +628,25 @@ public class WB_GUI implements DraftDataView{
        uButton = initGridRadioButton(positionSelectionPane, U, playerPositionsGroup, 27, 0, 1, 1);//new RadioButton("U");
        pButton = initGridRadioButton(positionSelectionPane, PITCHER, playerPositionsGroup, 30, 0, 1, 1);//new RadioButton("P");
        allButton.setSelected(true);
-       
+
        playersWorkspaceSplitPane = new SplitPane();
        playersWorkspaceSplitPane.getItems().add(playerSearchPane);
        playersWorkspaceSplitPane.getItems().add(positionSelectionPane);
        playersWorkspaceSplitPane.getStyleClass().add(CLASS_BORDERED_PANE);
-       
+
        playersControlBox = new VBox();
        playersControlBox.getStyleClass().add(CLASS_BORDERED_PANE);
        playersControlBox.getChildren().add(playersWorkspaceSplitPane);
-       
+
        playersCenterPane = new BorderPane();
        playersCenterPane.setTop(playersControlBox);
        playersCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
-       
+
        playersBox = new VBox();
        playersTable = new TableView();
        playersBox.getChildren().add(playersTable);
        playersBox.getStyleClass().add(CLASS_GRAY_PANE);
-       
+
        //SETUP TABLE COLUMNS
        playerFirstNameColumn = new TableColumn(COL_FIRSTNAME);
        playerLastNameColumn = new TableColumn(COL_LASTNAME);
@@ -621,7 +662,7 @@ public class WB_GUI implements DraftDataView{
        playerKColumn = new TableColumn(COL_K);
        playerNotesColumn = new TableColumn(COL_NOTES);
        playerNationOfBirthColumn = new TableColumn(COL_NATIONOFBIRTH);
-       
+
        //LINK COLUMNS TO DATA
        playerFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
        playerLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
@@ -637,7 +678,7 @@ public class WB_GUI implements DraftDataView{
        playerKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("K"));
        playerNotesColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("notes"));
        playerNationOfBirthColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("nationOfBirth"));
-       
+
        //MAKE THE NOTES CELLS EDITABLE BY THE USER
        playersTable.setEditable(true);
        playerNotesColumn.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -664,26 +705,26 @@ public class WB_GUI implements DraftDataView{
        playersTable.getColumns().add(playerNotesColumn);
        playersTable.getColumns().add(playerNationOfBirthColumn);
        playersTable.setItems(dataManager.getDraft().getAllPlayers());
-       
+
        //ASSEMBLE EVERYTHING
        playersCenterPane.setCenter(playersBox);
-       
+
     }
-    
+
     private void initFantasyTeamsScreenControls() throws IOException {
         teamsCenterPane = new VBox();
         teamsCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
-        
+
         lineupPane = new GridPane();
         draftNameLabel = initGridLabel(lineupPane, WB_PropertyType.DRAFT_NAME_LABEL, CLASS_SUBHEADING_LABEL, 0, 0, 1, 1);
         draftNameTextField = initGridTextField(lineupPane, MEDIUM_TEXT_FIELD_LENGTH, EMPTY_TEXT, true, 1, 0, 1, 1 );
-        
+
         lineupButtonsPane = new HBox();
         addTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.ADD_PLAYER_ICON, WB_PropertyType.ADD_TEAM_TOOLTIP, false);
         removeTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.REMOVE_PLAYER_ICON, WB_PropertyType.REMOVE_TEAM_TOOLTIP, true);
         editTeamButton = initChildButton(lineupButtonsPane, WB_PropertyType.EDIT_TEAM_ICON, WB_PropertyType.EDIT_TEAM_TOOLTIP, true);
         fantasyTeamsLabel = initChildLabel(lineupButtonsPane, WB_PropertyType.SELECT_TEAM_LABEL, CLASS_SUBHEADING_LABEL);
-        
+
         selectTeamComboBox = new ComboBox();
         selectTeamComboBox.setCellFactory(new Callback<ListView<Team>, ListCell<Team>>() {
             @Override
@@ -701,7 +742,7 @@ public class WB_GUI implements DraftDataView{
                };return cell;
             }
         });
-        
+
         selectTeamComboBox.setButtonCell(new ListCell<Team>(){
         @Override
         protected void updateItem(Team t, boolean bln) {
@@ -713,17 +754,17 @@ public class WB_GUI implements DraftDataView{
             }
         }
     });
-        
+
         selectTeamComboBox.setItems(dataManager.getDraft().getTeams());
-        
+
         lineupButtonsPane.getChildren().add(selectTeamComboBox);
-        
+
         fantasyTableBox = new VBox();
         startingLineupLabel = initChildLabel(fantasyTableBox, WB_PropertyType.STARTING_LINEUP_LABEL, CLASS_SUBHEADING_LABEL);
         fantasyTable = new TableView();
         fantasyTableBox.getChildren().add(fantasyTable);
         fantasyTableBox.getStyleClass().add(CLASS_BORDERED_PANE);
-        
+
         //SETUP TABLE COLUMNS
        fantasyPositionColumn = new TableColumn(COL_POSITION);
        fantasyFirstNameColumn = new TableColumn(COL_FIRSTNAME);
@@ -738,7 +779,7 @@ public class WB_GUI implements DraftDataView{
        fantasyKColumn = new TableColumn(COL_K);
        fantasyContractColumn = new TableColumn(COL_CONTRACT);
        fantasySalaryColumn = new TableColumn(COL_SALARY);
-       
+
         //LINK COLUMNS TO DATA
        fantasyPositionColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("TeamPosition"));
        fantasyFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
@@ -751,7 +792,7 @@ public class WB_GUI implements DraftDataView{
        fantasyHRBIColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("HRBI"));
        fantasyBBSBColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BBSB"));
        fantasyKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("K"));
-       
+
        fantasyTable.getColumns().add(fantasyPositionColumn);
        fantasyTable.getColumns().add(fantasyFirstNameColumn);
        fantasyTable.getColumns().add(fantasyLastNameColumn);
@@ -765,28 +806,67 @@ public class WB_GUI implements DraftDataView{
        fantasyTable.getColumns().add(fantasyKColumn);
        fantasyTable.getColumns().add(fantasyContractColumn);
        fantasyTable.getColumns().add(fantasySalaryColumn);
-       
+
         teamsCenterPane.getChildren().add(lineupButtonsPane);
         teamsCenterPane.getChildren().add(lineupPane);
         teamsCenterPane.getChildren().add(fantasyTableBox);
     }
-    
+
     private void initStandingsScreenControls(){
         standingsCenterPane = new VBox();
         standingsCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
+        
+        standingsTable = new TableView();
+        standingsCenterPane.getChildren().add(standingsTable);
+        
+        standingsNameColumn = new TableColumn(COL_TEAM);
+        standingsPlayersColumn = new TableColumn(COL_PLAYERS);
+        standingsMoneyLeftColumn = new TableColumn(COL_MONEYLEFT);
+        standingsMoneyPPColumn = new TableColumn(COL_MONEYPP);
+        standingsRunsColumn = new TableColumn(COL_R);
+        standingsHomeRunsColumn = new TableColumn(COL_HR);
+        standingsRBIColumn = new TableColumn(COL_RBI);
+        standingsSBColumn = new TableColumn(COL_SB);
+        standingsBAColumn = new TableColumn(COL_BA);
+        standingsWinsColumn = new TableColumn(COL_W);
+        standingsSavesColumn = new TableColumn(COL_SV);
+        standingsKColumn = new TableColumn(COL_K);
+        standingsERAColumn = new TableColumn(COL_ERA);
+        standingsWHIPColumn = new TableColumn(COL_WHIP);
+        standingsPointsColumn = new TableColumn(COL_POINTS);
+        
+        standingsTable.getColumns().add(standingsNameColumn);
+        standingsTable.getColumns().add(standingsPlayersColumn);
+        standingsTable.getColumns().add(standingsMoneyLeftColumn);
+        standingsTable.getColumns().add(standingsMoneyPPColumn);
+        standingsTable.getColumns().add(standingsRunsColumn);
+        standingsTable.getColumns().add(standingsHomeRunsColumn);
+        standingsTable.getColumns().add(standingsRBIColumn);
+        standingsTable.getColumns().add(standingsSBColumn);
+        standingsTable.getColumns().add(standingsBAColumn);
+        standingsTable.getColumns().add(standingsWinsColumn);
+        standingsTable.getColumns().add(standingsSavesColumn);
+        standingsTable.getColumns().add(standingsKColumn);
+        standingsTable.getColumns().add(standingsERAColumn);
+        standingsTable.getColumns().add(standingsWHIPColumn);
+        standingsTable.getColumns().add(standingsPointsColumn);
+        
+        standingsTable.setItems(dataManager.getDraft().getTeams());
+        
+        
     }
-    
+
     private void initDraftScreenControls(){
         draftCenterPane = new VBox();
         draftCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
-        
+
     }
-    
+
     private void initMLBTeamsScreenControls(){
-         mlbCenterPane = new VBox(); 
+         mlbCenterPane = new VBox();
          mlbCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
          proTeamLabel = initChildLabel(mlbCenterPane, WB_PropertyType.PRO_TEAM_LABEL, CLASS_PROMPT_LABEL);
-         
+
          mlbTeamsComboBox = new ComboBox();
          mlbTeamsComboBox.setCellFactory(new Callback<ListView<MLBTeam>, ListCell<MLBTeam>>() {
             @Override
@@ -818,27 +898,27 @@ public class WB_GUI implements DraftDataView{
          mlbTeamsComboBox.setItems(dataManager.getDraft().getMLBTeams());
          mlbTeamsComboBox.getSelectionModel().select(dataManager.getDraft().getMLBTeams().get(0));
          mlbCenterPane.getChildren().add(mlbTeamsComboBox);
-         
+
          proTeamsTable = new TableView();
          mlbCenterPane.getChildren().add(proTeamsTable);
-         
+
          mlbFirstNameColumn = new TableColumn(COL_FIRSTNAME);
          mlbLastNameColumn = new TableColumn(COL_LASTNAME);
          mlbPositionsColumn = new TableColumn(COL_POSITIONS);
-         
+
          mlbFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
          mlbLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
          mlbPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
-         
+
          proTeamsTable.getColumns().add(mlbFirstNameColumn);
          proTeamsTable.getColumns().add(mlbLastNameColumn);
          proTeamsTable.getColumns().add(mlbPositionsColumn);
-         
+
          proTeamsTable.setItems(dataManager.getDraft().getMLBTeams().get(0).getPlayers());
-         
-         
-         
-         
+
+
+
+
     }
 
     private void initEventHandlers() throws IOException {
@@ -859,7 +939,7 @@ public class WB_GUI implements DraftDataView{
         exitButton.setOnAction(e -> {
             fileController.handleExitRequest(this);
         });
-        
+
         //NOW THE BOTTOM TOOLBAR CONTROLS
         screenController = new ScreenController();
         fantasyTeamsButton.setOnAction(e -> {
@@ -885,7 +965,7 @@ public class WB_GUI implements DraftDataView{
         removePlayerButton.setOnAction(e -> {
             playerController.handleRemovePlayerRequest(this);
         });
-        
+
         //THE PLAYERS TABLE
         playersTable.setOnMouseClicked(e -> {
             if(e.getClickCount() == 2) {
@@ -896,7 +976,7 @@ public class WB_GUI implements DraftDataView{
         });
         registerToggleGroup(playerPositionsGroup);
         registerSearchBarController(playerSearchBar);
-        
+
         //NOW THE FANTASY TEAMS SCREEN
         //TEXT FIELDS WORK DIFFERENTLY
         teamsController = new TeamsController(primaryStage, dataManager.getDraft(), messageDialog);
@@ -904,26 +984,26 @@ public class WB_GUI implements DraftDataView{
         addTeamButton.setOnAction(e -> {
             teamsController.handleAddTeamRequest(this);
         });
-        
+
         removeTeamButton.setOnAction(e -> {
             teamsController.handleRemoveTeamRequest(this, selectTeamComboBox.getSelectionModel().getSelectedItem());
         });
         editTeamButton.setOnAction(e -> {
-            teamsController.handleEditTeamRequest(this, selectTeamComboBox.getSelectionModel().getSelectedItem());    
+            teamsController.handleEditTeamRequest(this, selectTeamComboBox.getSelectionModel().getSelectedItem());
         });
         selectTeamComboBox.setOnAction(e -> {
             teamsController.handleDraftChangeRequest(this);
         });
-        
+
         //NOW THE MLB TEAMS SCREEN
         mlbController = new MLBController();
         mlbTeamsComboBox.setOnAction(e -> {
             mlbController.handleTeamSelectRequest(this);
         });
-        
-        
+
+
     }
-    
+
     private void registerTextFieldController(TextField textField){
         textField.textProperty().addListener((observable, oldValue, newValue) ->{
             teamsController.handleDraftChangeRequest(this);
@@ -939,7 +1019,7 @@ public class WB_GUI implements DraftDataView{
             playerController.handlePlayerSearchRequest(this, playersTable, newValue);
         });
     }
-    
+
     private Button initChildButton(Pane toolbar, WB_PropertyType icon, WB_PropertyType tooltip, boolean disabled) {
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         String imagePath = "file:" + PATH_IMAGES + props.getProperty(icon.toString());
@@ -952,7 +1032,7 @@ public class WB_GUI implements DraftDataView{
         toolbar.getChildren().add(button);
         return button;
     }
-    
+
     private Label initLabel(WB_PropertyType labelProperty, String styleClass) {
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         String labelText = props.getProperty(labelProperty);
@@ -960,26 +1040,26 @@ public class WB_GUI implements DraftDataView{
         label.getStyleClass().add(styleClass);
         return label;
     }
-    
+
     private Label initGridLabel(GridPane container, WB_PropertyType labelProperty, String styleClass, int col, int row, int colSpan, int rowSpan) {
         Label label = initLabel(labelProperty, styleClass);
         container.add(label, col, row, colSpan, rowSpan);
         return label;
     }
-    
+
     // INIT A LABEL AND PUT IT IN A TOOLBAR
     private Label initChildLabel(Pane container, WB_PropertyType labelProperty, String styleClass) {
         Label label = initLabel(labelProperty, styleClass);
         container.getChildren().add(label);
         return label;
     }
-    
+
     private ComboBox initGridComboBox(GridPane container, int col, int row, int colSpan, int rowSpan) throws IOException {
         ComboBox comboBox = new ComboBox();
         container.add(comboBox, col, row, colSpan, rowSpan);
         return comboBox;
     }
-    
+
     private Button initGridButton(GridPane container, WB_PropertyType icon, WB_PropertyType tooltip, int col, int row, int colSpan, int rowSpan, boolean disabled) {
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         String imagePath = "file:" + PATH_IMAGES + props.getProperty(icon.toString());
@@ -992,7 +1072,7 @@ public class WB_GUI implements DraftDataView{
         container.add(button, col, row, colSpan, rowSpan);
         return button;
     }
-    
+
     private RadioButton initGridRadioButton(GridPane container, String position, ToggleGroup group, int col, int row, int colSpan, int rowSpan) {
         RadioButton rButton = new RadioButton(position);
         rButton.setUserData(position);
@@ -1009,6 +1089,6 @@ public class WB_GUI implements DraftDataView{
         container.add(tf, col, row, colSpan, rowSpan);
         return tf;
     }
-    
-    
+
+
 }
