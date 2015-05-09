@@ -20,6 +20,8 @@ public class ScreenController {
     
     public void handleScreenChangeRequest(WB_GUI gui, String screen){
         if(enabled){
+            if(screen.equalsIgnoreCase("teams screen"))
+                gui.updateDraftInfo(gui.getDataManager().getDraft());
             gui.changeScreen(screen);
         }
         
