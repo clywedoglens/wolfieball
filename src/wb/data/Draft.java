@@ -21,11 +21,14 @@ public class Draft {
     static int counter;
     ObservableList<Team> teams;
     ObservableList<Player> allPlayers;
+    Team freeAgency;
     ObservableList<MLBTeam> mlbTeams;
     HashMap<String, MLBTeam> mlbMap;
     public Draft(){
         teams = FXCollections.observableArrayList();
         mlbTeams = FXCollections.observableArrayList();
+        freeAgency = new Team();
+        freeAgency.setName("Free Agency");
         mlbMap = new HashMap<>();
         loadMLBTeams();
         allPlayers = FXCollections.observableArrayList();
@@ -88,6 +91,9 @@ public class Draft {
         return counter;
     }
     
+    public Team getFreeAgency(){
+        return freeAgency;
+    }
     private void loadMLBTeams(){
         ArrayList<String> teamNames= new ArrayList<String>();
         teamNames.add("ATL");

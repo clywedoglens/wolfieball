@@ -85,10 +85,9 @@ public class PlayerController {
         if(pd.wasCompleteSelected()) {
             //UPDATE THE PLAYER
             Player p = pd.getPlayer();
+            Team origTeam = null;
             //FIND THE ORIGINAL TEAM THE PLAYER WAS IN 
-            Team origTeam = new Team();
             if(p.getTeam() != null && p.getTeam().getName().equals("Free Agents") || pd.getSelectedTeam().getName().equals("Free Agents")){
-                if(pd.getSelectedTeam().getName().equals("Free Agents"));
             }
             else{
             if(p.getTeam() != null)

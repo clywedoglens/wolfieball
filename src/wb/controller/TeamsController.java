@@ -73,14 +73,14 @@ public class TeamsController {
             //WE MUST MOVE ALL THE PLAYERS TO THE FREE AGENCY TEAM
             //FIRST THE PITCHERS
             for(Player p: teamToRemove.getPitchers()){
-                Team freeAgency = gui.getDataManager().getDraft().getTeams().get(0);
+                Team freeAgency = gui.getDataManager().getDraft().getFreeAgency();
                 p.setTeam(freeAgency);
                 freeAgency.addPitcher(p);
             }
             //NOW THE HITTERS
             for(int i = 0; i < teamToRemove.getHitters().size(); i++){
                 for(Player p: teamToRemove.getHitters().get(i)){
-                    Team freeAgency = gui.getDataManager().getDraft().getTeams().get(0);
+                    Team freeAgency = gui.getDataManager().getDraft().getFreeAgency();
                     p.setTeam(freeAgency);
                     freeAgency.addHitter(p, i);
                 }

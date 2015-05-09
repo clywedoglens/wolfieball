@@ -5,6 +5,7 @@
  */
 package wb.data;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +56,7 @@ public class Team {
     }
     
     public void addPitcher(Player pitcher){
+        pitcher.setTeamPosition("P");
         pitchers.add(pitcher);
     }
     public List<Player> getPitchers(){
@@ -222,7 +224,35 @@ public class Team {
         
         return getMoneyLeft()/getPlayersNeeded();
     } 
+    public Integer getHR(){
+        int hr = 0;
+        
+        for(ArrayList<Player> a: hitters){
+            for(Player p: a)
+                hr += Integer.parseInt(p.getSVHR());
+        }
+        return hr;
+    }
     
+    public Integer getRBI(){
+        int rbi = 0;
+        
+        for(ArrayList<Player> a: hitters){
+            for(Player p: a)
+                rbi += Integer.parseInt(p.getHRBI());
+        }
+        return rbi;
+    }
+    
+    public Integer getSB(){
+        int sb = 0;
+        
+        for(ArrayList<Player> a: hitters){
+            for(Player p: a)
+                sb += Integer.parseInt(p.getBBSB());
+        }
+        return sb;
+    }
     public Double getBA(){
         
         int numOfHitters = 0;
@@ -273,6 +303,16 @@ public class Team {
         for(Player p: pitchers)
             era += p.getERA();
         
-        return era/numOfPitchers;
+        return Double.parseDouble(new DecimalFormat("##.##").format(era/numOfPitchers));
+    }
+    
+    public Double getWHIP(){
+        int numOfPitchers = pitchers.size();
+        double whip = 0;
+        
+        for(Player p: pitchers)
+            whip += p.getWHIP();
+        
+        return Double.parseDouble(new DecimalFormat("##.##").format(whip/numOfPitchers));
     }
 }

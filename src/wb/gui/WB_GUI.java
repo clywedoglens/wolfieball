@@ -220,12 +220,11 @@ public class WB_GUI implements DraftDataView{
     TableColumn fantasyLastNameColumn;
     TableColumn fantasyProTeamColumn;
     TableColumn fantasyPositionsColumn;
-    TableColumn fantasyERRColumn;
-    TableColumn fantasyWHColumn;
-    TableColumn fantasySVHRColumn;
-    TableColumn fantasyHRBIColumn;
-    TableColumn fantasyBBSBColumn;
-    TableColumn fantasyKColumn;
+    TableColumn fantasyRWColumn;
+    TableColumn fantasyHRSVColumn;
+    TableColumn fantasyRBIKColumn;
+    TableColumn fantasySBERAColumn;
+    TableColumn fantasyBAWHIPColumn;
     TableColumn fantasyContractColumn;
     TableColumn fantasySalaryColumn;
 
@@ -303,6 +302,14 @@ public class WB_GUI implements DraftDataView{
     static final String COL_K = "K";
     static final String COL_NOTES = "Notes";
     static final String COL_NATIONOFBIRTH = "Nation of Birth";
+    
+    
+    //TEAMS TABLE COLUMN
+    static final String COL_RW = "R/W";
+    static final String COL_HRSV = "HR/SV";
+    static final String COL_RBIK = "RBI/K";
+    static final String COL_SBERA = "SB/ERA";
+    static final String COL_BAWHIP = "BA/WHIP";
     static final String COL_CONTRACT = "Contract";
     static final String COL_SALARY = "Salary";
     
@@ -771,39 +778,36 @@ public class WB_GUI implements DraftDataView{
        fantasyLastNameColumn = new TableColumn(COL_LASTNAME);
        fantasyProTeamColumn = new TableColumn(COL_PROTEAM);
        fantasyPositionsColumn = new TableColumn(COL_POSITIONS);
-       fantasyERRColumn = new TableColumn(COL_ERR);
-       fantasyWHColumn = new TableColumn(COL_WH);
-       fantasySVHRColumn = new TableColumn(COL_SVHR);
-       fantasyHRBIColumn = new TableColumn(COL_HRBI);
-       fantasyBBSBColumn = new TableColumn(COL_BBSB);
-       fantasyKColumn = new TableColumn(COL_K);
+       fantasyRWColumn = new TableColumn(COL_RW);
+       fantasyHRSVColumn = new TableColumn(COL_HRSV);
+       fantasyRBIKColumn = new TableColumn(COL_RBIK);
+       fantasySBERAColumn = new TableColumn(COL_SBERA);
+       fantasyBAWHIPColumn = new TableColumn(COL_BAWHIP);
        fantasyContractColumn = new TableColumn(COL_CONTRACT);
        fantasySalaryColumn = new TableColumn(COL_SALARY);
 
         //LINK COLUMNS TO DATA
-       fantasyPositionColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("TeamPosition"));
+       fantasyPositionColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("teamPosition"));
        fantasyFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
        fantasyLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
        fantasyProTeamColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("MLBTeam"));
        fantasyPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
-       fantasyERRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("ERR"));
-       fantasyWHColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("WH"));
-       fantasySVHRColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SVHR"));
-       fantasyHRBIColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("HRBI"));
-       fantasyBBSBColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BBSB"));
-       fantasyKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("K"));
+       fantasyRWColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("RW"));
+       fantasyHRSVColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("HRSV"));
+       fantasyRBIKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("RBIK"));
+       fantasySBERAColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SBERA"));
+       fantasyBAWHIPColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BAWHIP"));
 
        fantasyTable.getColumns().add(fantasyPositionColumn);
        fantasyTable.getColumns().add(fantasyFirstNameColumn);
        fantasyTable.getColumns().add(fantasyLastNameColumn);
        fantasyTable.getColumns().add(fantasyProTeamColumn);
        fantasyTable.getColumns().add(fantasyPositionsColumn);
-       fantasyTable.getColumns().add(fantasyERRColumn);
-       fantasyTable.getColumns().add(fantasyWHColumn);
-       fantasyTable.getColumns().add(fantasySVHRColumn);
-       fantasyTable.getColumns().add(fantasyHRBIColumn);
-       fantasyTable.getColumns().add(fantasyBBSBColumn);
-       fantasyTable.getColumns().add(fantasyKColumn);
+       fantasyTable.getColumns().add(fantasyRWColumn);
+       fantasyTable.getColumns().add(fantasyHRSVColumn);
+       fantasyTable.getColumns().add(fantasyRBIKColumn);
+       fantasyTable.getColumns().add(fantasySBERAColumn);
+       fantasyTable.getColumns().add(fantasyBAWHIPColumn);
        fantasyTable.getColumns().add(fantasyContractColumn);
        fantasyTable.getColumns().add(fantasySalaryColumn);
 
@@ -835,6 +839,22 @@ public class WB_GUI implements DraftDataView{
         standingsWHIPColumn = new TableColumn(COL_WHIP);
         standingsPointsColumn = new TableColumn(COL_POINTS);
         
+        standingsNameColumn.setCellValueFactory(new PropertyValueFactory<Team, String>("name"));
+        standingsPlayersColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("PlayersNeeded"));
+        standingsMoneyLeftColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("MoneyLeft"));
+        standingsMoneyPPColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("MoneyPP"));
+        standingsRunsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("runs"));
+        standingsHomeRunsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("homeRuns"));
+        standingsRBIColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("RBI"));
+        standingsSBColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("SB"));
+        standingsBAColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("BA"));
+        standingsWinsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("Wins"));
+        standingsSavesColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("Saves"));
+        standingsKColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("K"));
+        standingsERAColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("ERA"));
+        standingsWHIPColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("WHIP"));
+        standingsPointsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("Points"));
+        
         standingsTable.getColumns().add(standingsNameColumn);
         standingsTable.getColumns().add(standingsPlayersColumn);
         standingsTable.getColumns().add(standingsMoneyLeftColumn);
@@ -851,6 +871,7 @@ public class WB_GUI implements DraftDataView{
         standingsTable.getColumns().add(standingsWHIPColumn);
         standingsTable.getColumns().add(standingsPointsColumn);
         
+        //ObservableList<Team> teams = dataManager.getDraft().getTeams().subList(LARGE_TEXT_FIELD_LENGTH, LARGE_TEXT_FIELD_LENGTH)
         standingsTable.setItems(dataManager.getDraft().getTeams());
         
         

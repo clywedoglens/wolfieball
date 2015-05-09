@@ -411,10 +411,12 @@ public class PlayerDialog extends Stage {
         
         
         //LOAD THE PLAYER INTO OUR LOCAL OBJECT
+        player = new Player();
         player.setFirstName(playerToEdit.getFirstName());
         player.setLastName(playerToEdit.getLastName());
         player.setYearOfBirth(playerToEdit.getYearOfBirth());
         player.setPosition(playerToEdit.getPosition());
+        player.setTeam(playerToEdit.getTeam());
         player.setMLBTeam(playerToEdit.getMLBTeam());
         player.setIPAB(playerToEdit.getIPAB());
         player.setERR(playerToEdit.getERR());

@@ -5,6 +5,7 @@
  */
 package wb.data;
 
+import java.text.DecimalFormat;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.StringProperty;
@@ -35,6 +36,7 @@ import javafx.beans.property.StringProperty;
     public StringProperty nationOfBirth;
     public StringProperty contract;
     public IntegerProperty salary;
+    public IntegerProperty pick;
     public static final String DEFAULT_NAME = "DEFAULT NAME";
     public Team team;
     
@@ -56,6 +58,7 @@ import javafx.beans.property.StringProperty;
         contract = new SimpleStringProperty("");
         salary = new SimpleIntegerProperty(0);
         position = new SimpleStringProperty("");
+        pick = new SimpleIntegerProperty(0);
         team = null;
     }
     
@@ -203,5 +206,74 @@ import javafx.beans.property.StringProperty;
     
     public Team getTeam(){
         return team;
+    }
+    
+    public void setContract(String initContract){
+        contract.set(initContract);
+    }
+    
+    public String getContract(){
+        return contract.get();
+    }
+    
+    public void setSalary(int initSalary){
+        salary.set(initSalary);
+    }
+    
+    public Integer getSalary(){
+        return salary.get();
+    }
+    
+    public void setPickNumber(int initPick){
+        this.pick.set(initPick);
+    }
+    
+    public Integer getPickNumber(){
+        return pick.get();
+    }
+    
+    public Integer getRW(){
+        if(position.get().equals("P"))
+            return Integer.parseInt(wh.get());
+        else
+            return Integer.parseInt(err.get());
+    }
+    
+    public Integer getHRSV(){
+        return Integer.parseInt(svhr.get());
+    }
+    
+    public Integer getRBIK(){
+        if(position.get().equals("P"))
+            return Integer.parseInt(k.get());
+        else
+            return Integer.parseInt(hrbi.get());
+    }
+    
+    public Double getSBERA(){
+        if(position.get().equals("P"))
+           return getERA();
+        else
+            return Double.parseDouble(new DecimalFormat("##.##").format(Double.parseDouble(bbsb.get())));
+    }
+    
+    public Double getBAWHIP(){
+        if(position.get().equals("P"))
+            return getWHIP();
+        else
+            return getBA();
+    }
+    public Double getBA(){
+        return Double.parseDouble(new DecimalFormat("##.##").format(Double.parseDouble(wh.get())/Double.parseDouble(ipab.get())));
+    }
+    
+    public Double getERA(){
+        
+        return Double.parseDouble(new DecimalFormat("##.##").format((Double.parseDouble(err.get()) * 9)/Double.parseDouble(ipab.get())));
+    }
+    
+    public Double getWHIP(){
+        
+        return Double.parseDouble(new DecimalFormat("##.##").format((Double.parseDouble(bbsb.get()) + Double.parseDouble(hrbi.get()))/Double.parseDouble(ipab.get())));
     }
 }
