@@ -191,4 +191,88 @@ public class Team {
     public String toString(){
         return teamName;
     }
+    
+    //ALL THE FOLLOWING METHODS WILL BE NEEDED FOR THE TABLE ON THE STANDINGS SCREEN
+    
+    public Integer getPlayersNeeded(){
+        
+        int numOfPitchers = pitchers.size();
+        int numOfHitters = 0;
+        for(ArrayList<Player> a: hitters){
+                numOfHitters += a.size();
+            }
+        
+        return 23 - (numOfPitchers + numOfHitters);
+    }
+    
+    public Integer getMoneyLeft(){
+        
+        int moneySpent = 0;
+        for(Player p: pitchers)
+            moneySpent += p.getSalary();
+        for(ArrayList<Player> a: hitters){
+            for(Player p: a)
+                moneySpent += p.getSalary();
+        }
+        
+        return 260 - moneySpent;
+    }
+    
+    public Integer getMoneyPP(){
+        
+        return getMoneyLeft()/getPlayersNeeded();
+    } 
+    
+    public Double getBA(){
+        
+        int numOfHitters = 0;
+        double average = 0;
+        
+        for(ArrayList<Player> a: hitters){
+            for(Player p: a){
+                numOfHitters++;
+                average += p.getBA();
+            }
+                
+        }
+        return average/numOfHitters;
+        
+    }
+    public Integer getWins(){
+        
+        int wins = 0;
+        for(Player p: pitchers)
+            wins += Integer.parseInt(p.getWH());
+        
+        return wins;
+    }
+    
+    public Integer getSaves(){
+        
+        int saves = 0;
+        for(Player p: pitchers)
+            saves += Integer.parseInt(p.getSVHR());
+        
+        return saves;
+    }
+    
+    public Integer getK(){
+        
+        int k = 0;
+        for(Player p: pitchers)
+            k += Integer.parseInt(p.getK());
+        
+        return k;
+    }
+    
+    public Double getERA(){
+        
+        int numOfPitchers = pitchers.size();
+        double era = 0;
+        
+        for(Player p: pitchers)
+            era += p.getERA();
+        
+        return era/numOfPitchers;
+    }
 }
