@@ -7,6 +7,7 @@ package wb.data;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -56,8 +57,10 @@ public class Team {
     }
     
     public void addPitcher(Player pitcher){
-        pitcher.setTeamPosition("P");
-        pitchers.add(pitcher);
+        if(pitchers.size() < 10){
+            pitcher.setTeamPosition("P");
+            pitchers.add(pitcher);
+        }
     }
     public List<Player> getPitchers(){
         return pitchers;
@@ -146,42 +149,89 @@ public class Team {
     }
     
     public void removeHitter(Player p, String position){
+        Iterator itr;
         switch(position.toUpperCase()){
-            case "C" : if(hitters.get(0).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(0).remove(p);
+            case "C" : itr = hitters.get(0).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "1B" : if(hitters.get(1).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(1).remove(p);
+            case "1B" : itr = hitters.get(1).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "CI" : if(hitters.get(2).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(2).remove(p);
+            case "CI" : itr = hitters.get(2).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "3B" : if(hitters.get(3).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(3).remove(p);
+            case "3B" : itr = hitters.get(3).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "2B" : if(hitters.get(4).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(4).remove(p);
+            case "2B" : itr = hitters.get(4).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "MI" : if(hitters.get(5).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(5).remove(p);
+            case "MI" : itr = hitters.get(5).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "SS" : if(hitters.get(6).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(6).remove(p);
+            case "SS" : itr = hitters.get(6).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "OF" : if(hitters.get(7).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(7).remove(p);
+            case "OF" : itr = hitters.get(7).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
                         break;
-            case "U"  : if(hitters.get(8).contains(p))
-                            p.setTeamPosition("");
-                            hitters.get(8).remove(p);
+            case "U"  : itr = hitters.get(8).iterator();
+                       while(itr.hasNext()){
+                           Player hitter = (Player) itr.next();
+                           if(hitter.getFirstName().equals(p.getFirstName()) && hitter.getLastName().equals(p.getLastName()) && hitter.getMLBTeam().equals(p.getMLBTeam())){
+                               itr.remove();
+                               break;
+                           }
+                       }
+            break;
                 
         }
     }
@@ -299,6 +349,8 @@ public class Team {
         
         int numOfPitchers = pitchers.size();
         double era = 0;
+        if(numOfPitchers == 0)
+            return 0.0;
         
         for(Player p: pitchers)
             era += p.getERA();
@@ -309,7 +361,8 @@ public class Team {
     public Double getWHIP(){
         int numOfPitchers = pitchers.size();
         double whip = 0;
-        
+        if(numOfPitchers == 0)
+            return 0.0;
         for(Player p: pitchers)
             whip += p.getWHIP();
         

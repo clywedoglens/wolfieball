@@ -264,16 +264,20 @@ import javafx.beans.property.StringProperty;
             return getBA();
     }
     public Double getBA(){
+        if(ipab.get().equals("0"))
+            return 0.0;
         return Double.parseDouble(new DecimalFormat("##.##").format(Double.parseDouble(wh.get())/Double.parseDouble(ipab.get())));
     }
     
     public Double getERA(){
-        
+        if(ipab.get().equals("0"))
+            return 0.0;
         return Double.parseDouble(new DecimalFormat("##.##").format((Double.parseDouble(err.get()) * 9)/Double.parseDouble(ipab.get())));
     }
     
     public Double getWHIP(){
-        
+        if(ipab.get().equals("0"))
+            return 0.0;
         return Double.parseDouble(new DecimalFormat("##.##").format((Double.parseDouble(bbsb.get()) + Double.parseDouble(hrbi.get()))/Double.parseDouble(ipab.get())));
     }
 }

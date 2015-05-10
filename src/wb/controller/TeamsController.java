@@ -6,6 +6,7 @@
 package wb.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javafx.stage.Stage;
 import properties_manager.PropertiesManager;
@@ -17,6 +18,7 @@ import wb.data.Team;
 import wb.error.ErrorHandler;
 import wb.gui.FantasyTeamDialog;
 import wb.gui.MessageDialog;
+import wb.gui.PlayerDialog;
 import wb.gui.WB_GUI;
 import wb.gui.YesNoCancelDialog;
 
@@ -30,10 +32,12 @@ public class TeamsController {
     FantasyTeamDialog ftd;
     MessageDialog messageDialog;
     YesNoCancelDialog yesNoCancelDialog;
+    PlayerDialog pd;
     ErrorHandler errorHandler;
     
     public TeamsController(Stage initStage, Draft draft, MessageDialog initMessageDialog)       {
         ftd = new FantasyTeamDialog(initStage, draft, initMessageDialog);
+        pd = new PlayerDialog(initStage, draft);
         errorHandler = ErrorHandler.getErrorHandler();
         enabled = true;
     }
@@ -73,16 +77,12 @@ public class TeamsController {
             //WE MUST MOVE ALL THE PLAYERS TO THE FREE AGENCY TEAM
             //FIRST THE PITCHERS
             for(Player p: teamToRemove.getPitchers()){
-                Team freeAgency = gui.getDataManager().getDraft().getFreeAgency();
-                p.setTeam(freeAgency);
-                freeAgency.addPitcher(p);
+                gui.getDataManager().getDraft().getAllPlayers().add(p);
             }
             //NOW THE HITTERS
             for(int i = 0; i < teamToRemove.getHitters().size(); i++){
                 for(Player p: teamToRemove.getHitters().get(i)){
-                    Team freeAgency = gui.getDataManager().getDraft().getFreeAgency();
-                    p.setTeam(freeAgency);
-                    freeAgency.addHitter(p, i);
+                    gui.getDataManager().getDraft().getAllPlayers().add(p);
                 }
             }
             //NOW REMOVE THE TEAM FROM THE TEAMS LIST
@@ -119,4 +119,64 @@ public class TeamsController {
         }
         
     }
+    
+        public void handleEditPlayerRequest(WB_GUI gui, Player playerToEdit){
+        dataManager = gui.getDataManager();
+        Draft draft = dataManager.getDraft();
+        //MAKE FREE AGENCY IS AN OPTION
+        pd.addFreeAgencyOption();
+        pd.showEditPlayerDialog(playerToEdit);
+        
+        //DID USER CONFIRM
+        if(pd.wasCompleteSelected()) {
+            //UPDATE THE PLAYER
+            Player p = pd.getPlayer();
+            Team origTeam = p.getTeam();
+            origTeam = draft.getTeams().get(draft.getTeams().indexOf(p.getTeam()));
+            Team newTeam = pd.getSelectedTeam();
+            if(newTeam.getName().equals("Free Agency")){
+                draft.addPlayer(p);
+                p.setTeam(null);
+                if(p.getPosition().equalsIgnoreCase("P")){
+                    Iterator itr = origTeam.getPitchers().iterator();
+                    while(itr.hasNext()){
+                        Player pitcher = (Player) itr.next();
+                        if(pitcher.getFirstName().equals(p.getFirstName()) && pitcher.getLastName().equals(p.getLastName()) && pitcher.getMLBTeam().equals(p.getMLBTeam())){
+                            itr.remove();
+                            break;
+                        }
+                    }
+            }
+            else
+                origTeam.removeHitter(p, pd.getSelectedPosition());
+            }
+            else{
+            p.setTeam(newTeam);
+            //NOW REMOVE THE PLAYER FROM ITS ORIGINAL TEAM
+            if(p.getPosition().equalsIgnoreCase("P"))
+                newTeam.addPitcher(p);
+            else
+                if(newTeam.addHitter(p, pd.getSelectedPosition()))
+                    ;
+                else
+                    errorHandler.handlePositionFullError();
+                    
+            if(p.getPosition().equalsIgnoreCase("P")){
+                Iterator itr = origTeam.getPitchers().iterator();
+                    while(itr.hasNext()){
+                        Player pitcher = (Player) itr.next();
+                        if(pitcher.getFirstName().equals(p.getFirstName()) && pitcher.getLastName().equals(p.getFirstName()) && pitcher.getMLBTeam().equals(p.getMLBTeam())){
+                            itr.remove();
+                            break;
+                        }
+                    }
+            }
+            else
+                origTeam.removeHitter(p, pd.getSelectedPosition());
+              
+            }
+            gui.getFileController().markAsEdited(gui);
+        }
+    }
+       
 }

@@ -20,18 +20,20 @@ public class Draft {
     int number;
     static int counter;
     ObservableList<Team> teams;
-    ObservableList<Player> allPlayers;
+    ObservableList<Player> availablePlayers;
+    ObservableList<Player> draftOrder;
     Team freeAgency;
     ObservableList<MLBTeam> mlbTeams;
     HashMap<String, MLBTeam> mlbMap;
     public Draft(){
         teams = FXCollections.observableArrayList();
         mlbTeams = FXCollections.observableArrayList();
+        mlbMap = new HashMap<>();
         freeAgency = new Team();
         freeAgency.setName("Free Agency");
-        mlbMap = new HashMap<>();
         loadMLBTeams();
-        allPlayers = FXCollections.observableArrayList();
+        availablePlayers = FXCollections.observableArrayList();
+        draftOrder = FXCollections.observableArrayList();
     }
     
     public void addPlayer(Player p){
@@ -40,7 +42,7 @@ public class Draft {
             //DONT ADD IT TO THE LIST
         }
         else{
-            allPlayers.add(p);
+            availablePlayers.add(p);
             MLBTeam mlb = mlbMap.get(p.getMLBTeam());
             if(mlb == null)
                 p.setFirstName(p.getFirstName());
@@ -49,13 +51,20 @@ public class Draft {
         
     }
     public ObservableList<Player> getAllPlayers(){
-        return allPlayers;
+        return availablePlayers;
     }
     
     public void setAllPlayers(ObservableList<Player> allPlayers){
-        this.allPlayers = allPlayers;   
+        this.availablePlayers = allPlayers;   
     }
     
+    public ObservableList<Player> getDraftOrder(){
+        return draftOrder;
+    }
+    
+    public void setDraftOrder(ObservableList<Player> allPlayers){
+        
+    }
     public void setName(String name){
         this.name = name;
     }

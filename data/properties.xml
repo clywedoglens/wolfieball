@@ -25,6 +25,9 @@
 		<property name="DRAFT_SCREEN_ICON"			value="Draft.png"></property>
 		<property name="MLBTEAMS_SCREEN_ICON"		value="MLBTeams.png"></property>
 		<property name="EDIT_TEAM_ICON"			value="EditItem.png"></property>
+		<property name="MANUAL_DRAFT_ICON"		value="ManualDraft.png"></property>
+		<property name="AUTO_DRAFT_ICON"		value="AutoDraft.png"></property>
+		<property name="PAUSE_DRAFT_ICON"		value="PauseDraft.png"></property>
         
         <!-- TOOLTIPS FOR BUTTONS -->
         <property name="NEW_DRAFT_TOOLTIP"         value="Create a New Draft League"></property>

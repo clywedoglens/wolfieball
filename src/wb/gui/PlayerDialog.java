@@ -351,7 +351,16 @@ public class PlayerDialog extends Stage {
     public Player getPlayer() {
         return player;
     }
+    public void addFreeAgencyOption(){
+        ObservableList<Team> allTeams = FXCollections.observableArrayList();
+        allTeams.addAll(draft.getTeams());
+        allTeams.add(draft.getFreeAgency());
+        fantasyTeams.setItems(allTeams);
+    }
     
+    public void removeFreeAgencyOption(){
+        fantasyTeams.setItems(draft.getTeams());
+    }
     public Player showAddPlayerDialog() {
         setTitle(ADD_PLAYER_TITLE);
         //MAKE SURE THE SCENE IS CORRECT
@@ -405,10 +414,11 @@ public class PlayerDialog extends Stage {
     public ArrayList<CheckBox> getCheckBoxes(){
         return positionList;
     }
-    public void showEditLectureDialog(Player playerToEdit){
+    public void showEditPlayerDialog(Player playerToEdit){
         setTitle(EDIT_PLAYER_TITLE);
         
-        
+        if(playerToEdit.getTeam() != null)
+            fantasyTeams.getSelectionModel().select(playerToEdit.getTeam());
         
         //LOAD THE PLAYER INTO OUR LOCAL OBJECT
         player = new Player();

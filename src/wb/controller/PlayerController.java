@@ -6,6 +6,7 @@
 package wb.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.CheckBox;
@@ -79,42 +80,36 @@ public class PlayerController {
     public void handleEditPlayerRequest(WB_GUI gui, Player playerToEdit){
         dataManager = gui.getDataManager();
         Draft draft = dataManager.getDraft();
-        pd.showEditLectureDialog(playerToEdit);
+        //MAKE SURE FREE AGENCY IS NOT AN OPTION, SINCE THIS PLAYER IS ALREADY A FREE AGENT
+        pd.removeFreeAgencyOption();
+        pd.showEditPlayerDialog(playerToEdit);
         
         //DID USER CONFIRM
         if(pd.wasCompleteSelected()) {
             //UPDATE THE PLAYER
             Player p = pd.getPlayer();
-            Team origTeam = null;
-            //FIND THE ORIGINAL TEAM THE PLAYER WAS IN 
-            if(p.getTeam() != null && p.getTeam().getName().equals("Free Agents") || pd.getSelectedTeam().getName().equals("Free Agents")){
-            }
-            else{
-            if(p.getTeam() != null)
-                origTeam = draft.getTeams().get(draft.getTeams().indexOf(p.getTeam()));
             Team newTeam = pd.getSelectedTeam();
             p.setTeam(newTeam);
             //NOW REMOVE THE PLAYER FROM ITS ORIGINAL TEAM
             if(p.getPosition().equalsIgnoreCase("P"))
                 newTeam.addPitcher(p);
-            else
+            else{
                 if(newTeam.addHitter(p, pd.getSelectedPosition()))
                     ;
                 else
                     eH.handlePositionFullError();
-                    
-            if(origTeam != null){
-                if(p.getPosition().equalsIgnoreCase("P")){
-                    origTeam.getPitchers().remove(p);
-                }
-                else{
-                    origTeam.removeHitter(p, pd.getSelectedPosition());
-                }
                 
                 gui.getFileController().markAsEdited(gui);
             }
-        }
-        }
+           Iterator itr = draft.getAllPlayers().iterator();
+           while(itr.hasNext()){
+               Player player = (Player) itr.next();
+               if(player.getFirstName().equals(p.getFirstName()) && player.getLastName().equals(p.getLastName()) && player.getMLBTeam().equals(p.getMLBTeam())){
+                   itr.remove();
+                   break;
+               }
+           }
+    }
        
         
     }

@@ -38,7 +38,11 @@ public class DraftDataManager {
     public void reset() {
         draft.setNumber(DEFAULT_NUM);
         draft.clearTeams();
-        
+        try{
+        fileManager.loadAllPlayers(draft);
+        }catch(Exception e){
+            //DO NOTHING
+        }
         view.reloadDraft(draft);
     }
 }

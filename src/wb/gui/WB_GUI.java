@@ -257,6 +257,17 @@ public class WB_GUI implements DraftDataView{
     Label draftSummaryLabel;
     GridPane draftLabelPane;
     BorderPane draftWorkspacePane;
+    HBox draftButtonPane;
+    Button draftDraftPlayerButton;
+    Button draftAutoDraftButton;
+    Button draftPauseAutoDraftButton;
+    TableView draftSummaryTable;
+    TableColumn draftPickNumberColumn;
+    TableColumn draftFirstNameColumn;
+    TableColumn draftLastNameColumn;
+    TableColumn draftTeamNameColumn;
+    TableColumn draftContractColumn;
+    TableColumn draftSalaryColumn;
 
 
     //MLB TEAMS SCREEN WORKSPACE
@@ -311,7 +322,7 @@ public class WB_GUI implements DraftDataView{
     static final String COL_SBERA = "SB/ERA";
     static final String COL_BAWHIP = "BA/WHIP";
     static final String COL_CONTRACT = "Contract";
-    static final String COL_SALARY = "Salary";
+    static final String COL_SALARY = "Salary ($)";
     
     //STANDINGS TABLE COLUMNS
     static final String COL_TEAM = "Team Name";
@@ -329,6 +340,8 @@ public class WB_GUI implements DraftDataView{
     static final String COL_WHIP = "WHIP";
     static final String COL_POINTS = "Total Points";
     
+    //DRAFT TABLE COLUMNS
+    static final String COL_PICK = "Pick #";
 
     //DIALOGS
     MessageDialog messageDialog;
@@ -430,6 +443,21 @@ public class WB_GUI implements DraftDataView{
 
 
     }
+    
+    public void disableToolBars(){
+        
+        newDraftButton.setDisable(true);
+        loadDraftButton.setDisable(true);
+        saveDraftButton.setDisable(true);
+        
+        fantasyTeamsButton.setDisable(true);
+        playersButton.setDisable(true);
+        teamsStandingsButton.setDisable(true);
+        draftSummaryButton.setDisable(true);
+        mlbTeamsButton.setDisable(true);
+        
+        
+    }
 
     public void changeScreen(String screen) {
 
@@ -442,18 +470,42 @@ public class WB_GUI implements DraftDataView{
     public void updateDraftInfo(Draft draft) {
         draft.setName(draftNameTextField.getText());
         Team teamToShow = selectTeamComboBox.getSelectionModel().getSelectedItem();
-        ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
-        fantasyTeamPlayers.addAll(teamToShow.getPitchers());
-        for(ArrayList<Player> a: teamToShow.getHitters())
+        if(teamToShow != null){
+             ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
+            fantasyTeamPlayers.addAll(teamToShow.getPitchers());
+            for(ArrayList<Player> a: teamToShow.getHitters())
             fantasyTeamPlayers.addAll(a);
-        fantasyTable.setItems(fantasyTeamPlayers);
+            fantasyTable.setItems(fantasyTeamPlayers);
+        }
     }
 
     public void updateMLBTable(Draft draft) {
         MLBTeam teamToShow = mlbTeamsComboBox.getSelectionModel().getSelectedItem();
         proTeamsTable.setItems(teamToShow.getPlayers());
     }
+    
+    public void updatePlayersTable(Draft draft){
+        ObservableList<Player> updatedList = draft.getAllPlayers();
+        playersTable.setItems(updatedList);
+    }
 
+    public void enableDraftMode(){
+        draftPauseAutoDraftButton.setDisable(false);
+        draftAutoDraftButton.setDisable(true);
+        draftDraftPlayerButton.setDisable(true);
+        
+        disableToolBars();
+    }
+    
+    public void disableDraftMode(){
+        draftPauseAutoDraftButton.setDisable(true);
+        draftAutoDraftButton.setDisable(false);
+        draftDraftPlayerButton.setDisable(false);
+        
+        newDraftButton.setDisable(true);
+        loadDraftButton.setDisable(true);
+        updateToolbarControls(true);
+    }
     /****************************************************************************/
     /* BELOW ARE ALL THE PRIVATE HELPER METHODS WE USE FOR INITIALIZING OUR GUI */
     /****************************************************************************/
@@ -871,7 +923,6 @@ public class WB_GUI implements DraftDataView{
         standingsTable.getColumns().add(standingsWHIPColumn);
         standingsTable.getColumns().add(standingsPointsColumn);
         
-        //ObservableList<Team> teams = dataManager.getDraft().getTeams().subList(LARGE_TEXT_FIELD_LENGTH, LARGE_TEXT_FIELD_LENGTH)
         standingsTable.setItems(dataManager.getDraft().getTeams());
         
         
@@ -880,7 +931,31 @@ public class WB_GUI implements DraftDataView{
     private void initDraftScreenControls(){
         draftCenterPane = new VBox();
         draftCenterPane.getStyleClass().add(CLASS_GRAY_PANE);
-
+        
+        //BUTTONS
+        draftButtonPane = new HBox();
+        draftDraftPlayerButton = initChildButton(draftButtonPane, WB_PropertyType.MANUAL_DRAFT_ICON, WB_PropertyType.MANUAL_DRAFT_TOOLTIP, false);
+        draftAutoDraftButton = initChildButton(draftButtonPane, WB_PropertyType.AUTO_DRAFT_ICON, WB_PropertyType.MANUAL_DRAFT_TOOLTIP, false);
+        draftPauseAutoDraftButton = initChildButton(draftButtonPane, WB_PropertyType.PAUSE_DRAFT_ICON, WB_PropertyType.MANUAL_DRAFT_TOOLTIP, true);
+        draftCenterPane.getChildren().add(draftButtonPane);
+        
+        draftSummaryTable = new TableView();
+        draftCenterPane.getChildren().add(draftSummaryTable);
+        
+        draftPickNumberColumn = new TableColumn(COL_PICK);
+        draftFirstNameColumn = new TableColumn(COL_FIRSTNAME);
+        draftLastNameColumn = new TableColumn(COL_LASTNAME);
+        draftContractColumn = new TableColumn(COL_CONTRACT);
+        draftSalaryColumn = new TableColumn(COL_SALARY);
+        
+        draftPickNumberColumn.setCellValueFactory(new PropertyValueFactory<Player, Integer>("PickNumber"));
+        draftFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
+        draftLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
+        draftContractColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("contract"));
+        draftSalaryColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("salary"));
+        
+        draftSummaryTable.getColumns().addAll(draftPickNumberColumn, draftFirstNameColumn, draftLastNameColumn, draftContractColumn, draftSalaryColumn);
+        draftSummaryTable.setItems(dataManager.getDraft().getDraftOrder());
     }
 
     private void initMLBTeamsScreenControls(){
@@ -936,10 +1011,7 @@ public class WB_GUI implements DraftDataView{
          proTeamsTable.getColumns().add(mlbPositionsColumn);
 
          proTeamsTable.setItems(dataManager.getDraft().getMLBTeams().get(0).getPlayers());
-
-
-
-
+         
     }
 
     private void initEventHandlers() throws IOException {
@@ -993,6 +1065,7 @@ public class WB_GUI implements DraftDataView{
                 //OPEN UP THE PLAYER EDITOR
                 Player p = playersTable.getSelectionModel().getSelectedItem();
                 playerController.handleEditPlayerRequest(this, p);
+                updatePlayersTable(dataManager.getDraft());
             }
         });
         registerToggleGroup(playerPositionsGroup);
@@ -1015,7 +1088,28 @@ public class WB_GUI implements DraftDataView{
         selectTeamComboBox.setOnAction(e -> {
             teamsController.handleDraftChangeRequest(this);
         });
+        
+        fantasyTable.setOnMouseClicked(e -> {
+            if(e.getClickCount() == 2){
+                //OPEN UP THE PLAYER EDITOR
+                Player p = fantasyTable.getSelectionModel().getSelectedItem();
+                teamsController.handleEditPlayerRequest(this, p);
+                updateDraftInfo(dataManager.getDraft());
+            }
+        });
 
+        //THE DRAFT SUMMARY SCREEN
+        draftController = new DraftEditsController();
+        draftDraftPlayerButton.setOnAction(e -> {
+            draftController.handleAddPlayerRequest(this);
+        });
+        draftAutoDraftButton.setOnAction(e -> {
+            draftController.handleAutoDraftRequest(this, draftSummaryTable);
+        });
+        draftPauseAutoDraftButton.setOnAction(e -> {
+            draftController.handlePauseAutoDraftRequest(this);
+        });
+        
         //NOW THE MLB TEAMS SCREEN
         mlbController = new MLBController();
         mlbTeamsComboBox.setOnAction(e -> {
