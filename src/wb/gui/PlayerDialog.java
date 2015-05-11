@@ -80,7 +80,7 @@ public class PlayerDialog extends Stage {
     Label positionLabel;
     ComboBox<String> positions;
     Label contractLabel;
-    ComboBox contracts;
+    ComboBox<String> contracts;
     Label salaryLabel;
     TextField salaryTextField;
     Button completeButton;
@@ -307,6 +307,7 @@ public class PlayerDialog extends Stage {
        contractLabel = new Label(CONTRACT_PROMPT);
        contractLabel.getStyleClass().add(CLASS_PROMPT_LABEL);
        contracts = new ComboBox();
+       contracts.getItems().addAll("S1","S2", "X");
        contracts.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
            @Override
            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -385,6 +386,7 @@ public class PlayerDialog extends Stage {
         playerPicture.setImage(playerPortraitImage);
         playerFlagImage = new Image("file:" + PATH_FLAGS + player.getNationOfBirth() + ".png");
         flagPicture.setImage(playerFlagImage);
+       
         
         ObservableList<String> playerPositions = FXCollections.observableArrayList();
         String[] playerPositionsStrings = player.getPosition().split("_");
@@ -410,10 +412,14 @@ public class PlayerDialog extends Stage {
     public String getSelectedPosition(){
         return positions.getSelectionModel().getSelectedItem();
     }
+    public String getSelectedContract(){
+        return contracts.getSelectionModel().getSelectedItem();
+    }
     
     public ArrayList<CheckBox> getCheckBoxes(){
         return positionList;
     }
+    
     public void showEditPlayerDialog(Player playerToEdit){
         setTitle(EDIT_PLAYER_TITLE);
         

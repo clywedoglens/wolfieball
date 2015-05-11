@@ -5,7 +5,10 @@
  */
 package wb.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -34,64 +37,73 @@ public class DraftEditsController {
     private Service<ObservableList<Player>> autoDraftThread;
     private int nextIndex;                  //THIS IS THE INDEX FOR THE NEXT TEAM TO PICK IN THE DRAFT
     WB_GUI gui;
+    private int totalDraftPicks;
+    private int plusTaxiPicks;
+    
     public DraftEditsController(){
+        
         enabled = true;
         nextIndex = 0;
     }
     
     public void handleAddPlayerRequest(WB_GUI gui){
+        
         dataManager = gui.getDataManager();
         Draft draft = dataManager.getDraft();
-        
-        //GET THE TEAM DRAFTING
-        Team draftingTeam = draft.getTeams().get(nextIndex);
+        totalDraftPicks = draft.getTeams().size() * 23;
+        plusTaxiPicks = totalDraftPicks + (draft.getTeams().size() * 8);
         //GET THE LIST OF AVAILABLE PLAYERS TO DRAFT
         ObservableList<Player> availablePlayers = draft.getAllPlayers();
-        
-        if(!availablePlayers.isEmpty()){
-        Player draftedPlayer = availablePlayers.get(new Random().nextInt(availablePlayers.size()));
-        draftedPlayer.setSalary(1);
-        if(draftedPlayer.getPosition().equals("P")){
-            draftedPlayer.setTeamPosition("P");
-            draftingTeam.addPitcher(draftedPlayer);
+        //GET THE TEAM DRAFTING
+        Team draftingTeam = draft.getTeams().get(nextIndex);
+        if(draft.getDraftOrder().size() < totalDraftPicks){
+            boolean wasNotAdded = true;
+            while(wasNotAdded){
+                wasNotAdded = addPlayer(draftingTeam, availablePlayers);
             }
-        else{
-            String[] eligiblePositions = draftedPlayer.getPosition().split("_");
-            if(eligiblePositions.length > 1)
-                eligiblePositions.toString();
-            draftedPlayer.setTeamPosition(eligiblePositions[new Random().nextInt(eligiblePositions.length)]);
-            
-            //NOW ADD THE PLAYER TO THE TEAM
-            draftedPlayer.setTeam(draftingTeam);
-            draftingTeam.addHitter(draftedPlayer, draftedPlayer.getTeamPosition());
         }
+        else if(draft.getDraftOrder().size() < plusTaxiPicks){
+            Player draftedPlayer = availablePlayers.get(new Random().nextInt(availablePlayers.size()));
+            draftedPlayer.setSalary(1);
+            draftedPlayer.setContract("X");
+            draftedPlayer.setTeam(draftingTeam);
+            if(draftedPlayer.getPosition().equals("P")){
+                draftedPlayer.setTeamPosition("P");
+            }
+            else{
+                String[] eligiblePositions = draftedPlayer.getPosition().split("_");
+                String teamPosition = eligiblePositions[new Random().nextInt(eligiblePositions.length)];
+                draftedPlayer.setTeamPosition(teamPosition);
+            }
+            draftingTeam.addToTaxiSquad(draftedPlayer);
             draft.getDraftOrder().add(draftedPlayer);
             draftedPlayer.setPickNumber(draft.getDraftOrder().size());
-        //WE MUST NOW REMOVE THE PLAYER FROM THE FREE AGENTS TABLE
-        Iterator itr = draft.getAllPlayers().iterator();
-           while(itr.hasNext()){
-               Player player = (Player) itr.next();
-               if(player.getFirstName().equals(draftedPlayer.getFirstName()) && player.getLastName().equals(draftedPlayer.getLastName()) && player.getMLBTeam().equals(draftedPlayer.getMLBTeam())){
-                   itr.remove();
-                   break;
-               }
-           }
+        
+            //WE MUST NOW REMOVE THE PLAYER FROM THE FREE AGENTS TABLE
+            Iterator itr = draft.getAllPlayers().iterator();
+            while(itr.hasNext()){
+                Player player = (Player) itr.next();
+                if(player.getFirstName().equals(draftedPlayer.getFirstName()) && player.getLastName().equals(draftedPlayer.getLastName()) && player.getMLBTeam().equals(draftedPlayer.getMLBTeam())){
+                    itr.remove();
+                    break;
+                }
+            }
+        }
         //NOW INCREMENT NEXTINDEX, BUT ONCE IT GOES PAST THE AMOUNT OF TEAMS, IT MUST RESET TO THE FIRST TEAM
         nextIndex++;
         if(nextIndex > draft.getTeams().size() - 1)
             nextIndex = 0;
         gui.getFileController().markAsEdited(gui);
-        }
+        gui.updateDraftInfo(draft);
+        gui.updatePlayersTable(draft);
+        dataManager.getDraft().updateTotalPoints();
     }
     
     public void handleAutoDraftRequest(WB_GUI gui, TableView table){
         this.gui = gui;
         dataManager = gui.getDataManager();
         Draft draft = dataManager.getDraft();
-        
-        //THE DRAFT IS RUNNING, UPDATE CERTAIN BUTTONS
         gui.enableDraftMode();
-        
         autoDraftThread = new Service<ObservableList<Player>>() {
             
             @Override
@@ -116,45 +128,58 @@ public class DraftEditsController {
         autoDraftThread.cancel();
         gui.disableDraftMode();
     }
-    private Player getDraftedPlayer(WB_GUI gui, Draft draft){
-        
-        ObservableList<Player> autoDraft = draft.getDraftOrder();
-        Team draftingTeam = draft.getTeams().get(nextIndex);
-        //GET THE LIST OF AVAILABLE PLAYERS TO DRAFT
-        ObservableList<Player> availablePlayers = draft.getAllPlayers();
-        
+    
+    private boolean addPlayer(Team draftingTeam, ObservableList<Player> availablePlayers){
+    
         Player draftedPlayer = availablePlayers.get(new Random().nextInt(availablePlayers.size()));
-        draftedPlayer.setSalary(1);
         if(draftedPlayer.getPosition().equals("P")){
-            draftedPlayer.setTeamPosition("P");
-            draftingTeam.addPitcher(draftedPlayer);
+            if(draftingTeam.addPitcher(draftedPlayer)){
+                draftedPlayer.setTeam(draftingTeam);
+                draftedPlayer.setContract("S2");
+                draftedPlayer.setSalary(1);
+                dataManager.getDraft().getDraftOrder().add(draftedPlayer);
+                draftedPlayer.setPickNumber(dataManager.getDraft().getDraftOrder().size());
+                //WE MUST NOW REMOVE THE PLAYER FROM THE FREE AGENTS TABLE
+                Iterator itr = dataManager.getDraft().getAllPlayers().iterator();
+                while(itr.hasNext()){
+                    Player player = (Player) itr.next();
+                    if(player.getFirstName().equals(draftedPlayer.getFirstName()) && player.getLastName().equals(draftedPlayer.getLastName()) && player.getMLBTeam().equals(draftedPlayer.getMLBTeam())){
+                        itr.remove();
+                        break;
+                    }
+                }
+                return false;
             }
+            return true;
+        }
         else{
             String[] eligiblePositions = draftedPlayer.getPosition().split("_");
-            draftedPlayer.setTeamPosition(eligiblePositions[new Random().nextInt(eligiblePositions.length)]);
-            
-            //NOW ADD THE PLAYER TO THE TEAM
-            draftedPlayer.setTeam(draftingTeam);
-            draftingTeam.addHitter(draftedPlayer, draftedPlayer.getTeamPosition());
+                List<String> playerPositions = new ArrayList<>(Arrays.asList(eligiblePositions));
+                if(playerPositions.contains("1B") && playerPositions.contains("3B"))
+                    playerPositions.add("CI");
+                else if(playerPositions.contains("2B") && playerPositions.contains("SS"))
+                    playerPositions.add("MI");   
+                if(playerPositions.size() > 1)
+                    playerPositions.add("U");
+                String teamPosition = playerPositions.get(new Random().nextInt(playerPositions.size()));
+                if(draftingTeam.addHitter(draftedPlayer, teamPosition)){
+                    draftedPlayer.setTeam(draftingTeam);
+                    draftedPlayer.setContract("S2");
+                    draftedPlayer.setSalary(1);
+                    dataManager.getDraft().getDraftOrder().add(draftedPlayer);
+                    draftedPlayer.setPickNumber(dataManager.getDraft().getDraftOrder().size());
+                    Iterator itr = dataManager.getDraft().getAllPlayers().iterator();
+                    while(itr.hasNext()){
+                        Player player = (Player) itr.next();
+                        if(player.getFirstName().equals(draftedPlayer.getFirstName()) && player.getLastName().equals(draftedPlayer.getLastName()) && player.getMLBTeam().equals(draftedPlayer.getMLBTeam())){
+                            itr.remove();
+                            break;
+                        }
+                    }
+                    return false;
+                }
+                return true;
         }
-            
-        //WE MUST NOW REMOVE THE PLAYER FROM THE FREE AGENTS TABLE
-        Iterator itr = draft.getAllPlayers().iterator();
-           while(itr.hasNext()){
-               Player player = (Player) itr.next();
-               if(player.getFirstName().equals(draftedPlayer.getFirstName()) && player.getLastName().equals(draftedPlayer.getLastName()) && player.getMLBTeam().equals(draftedPlayer.getMLBTeam())){
-                   itr.remove();
-                   break;
-               }
-           }
-        //NOW INCREMENT NEXTINDEX, BUT ONCE IT GOES PAST THE AMOUNT OF TEAMS, IT MUST RESET TO THE FIRST TEAM
-        nextIndex++;
-        if(nextIndex > draft.getTeams().size() - 1)
-            nextIndex = 0;
-        gui.getFileController().markAsEdited(gui);
-        
-        return draftedPlayer;
-        
     }
     
     class PartialResultsTask extends Task<ObservableList<Player>>{
@@ -169,18 +194,15 @@ public class DraftEditsController {
         
         @Override
         protected ObservableList call() throws Exception {
-            int playersSize = dataManager.getDraft().getAllPlayers().size();
-            while(!dataManager.getDraft().getAllPlayers().isEmpty()){
+            while(dataManager.getDraft().getDraftOrder().size() <= plusTaxiPicks){
                 if (isCancelled()) break;
-                
-                Player draftedPlayer = getDraftedPlayer(gui, dataManager.getDraft());
                 Platform.runLater(new Runnable() {
                     @Override public void run(){
-                        getPartialResults().add(draftedPlayer);
-                        draftedPlayer.setPickNumber(getPartialResults().size());
+                        handleAddPlayerRequest(gui);
                     }
                 });
                 updateValue(dataManager.getDraft().getDraftOrder());
+                
                 try{
                     Thread.sleep(1000);
                 }

@@ -207,7 +207,9 @@ import javafx.beans.property.StringProperty;
     public Team getTeam(){
         return team;
     }
-    
+    public String getTeamName(){
+        return team.getName();
+    }
     public void setContract(String initContract){
         contract.set(initContract);
     }

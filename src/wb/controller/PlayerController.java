@@ -89,30 +89,44 @@ public class PlayerController {
             //UPDATE THE PLAYER
             Player p = pd.getPlayer();
             Team newTeam = pd.getSelectedTeam();
-            p.setTeam(newTeam);
-            //NOW REMOVE THE PLAYER FROM ITS ORIGINAL TEAM
-            if(p.getPosition().equalsIgnoreCase("P"))
-                newTeam.addPitcher(p);
-            else{
-                if(newTeam.addHitter(p, pd.getSelectedPosition()))
-                    ;
-                else
-                    eH.handlePositionFullError();
-                
-                gui.getFileController().markAsEdited(gui);
+            //DEAL WITH THE CONTRACT
+            if(pd.getSelectedContract().equals("X")){
+                int numOfPlayers;
+                numOfPlayers = newTeam.getPitchers().size();
+                for(ArrayList<Player> a: newTeam.getHitters())
+                    numOfPlayers += a.size();
+                if(numOfPlayers == 23){
+                    p.setContract("X");
+                    newTeam.addToTaxiSquad(p);
+                }
+                else{
+                    eH.handleTaxiSquadError();
+                    return;
+                }
             }
-           Iterator itr = draft.getAllPlayers().iterator();
-           while(itr.hasNext()){
-               Player player = (Player) itr.next();
-               if(player.getFirstName().equals(p.getFirstName()) && player.getLastName().equals(p.getLastName()) && player.getMLBTeam().equals(p.getMLBTeam())){
-                   itr.remove();
-                   break;
+            else{
+                p.setContract(pd.getSelectedContract());
+                if(p.getPosition().equalsIgnoreCase("P"))
+                    newTeam.addPitcher(p);
+                else{
+                    if(newTeam.addHitter(p, pd.getSelectedPosition()))
+                        ;
+                    else
+                        eH.handlePositionFullError();
+                }   
+            }
+            gui.getFileController().markAsEdited(gui);
+            Iterator itr = draft.getAllPlayers().iterator();
+            while(itr.hasNext()){
+                Player player = (Player) itr.next();
+                if(player.getFirstName().equals(p.getFirstName()) && player.getLastName().equals(p.getLastName()) && player.getMLBTeam().equals(p.getMLBTeam())){
+                    itr.remove();
+                    break;
                }
-           }
+            } 
+        }
     }
-       
-        
-    }
+    
     public void handlePlayerSearchRequest(WB_GUI gui, TableView table, String player){
         dataManager = gui.getDataManager();
         Draft draft = dataManager.getDraft();

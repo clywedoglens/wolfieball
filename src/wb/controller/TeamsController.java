@@ -132,12 +132,50 @@ public class TeamsController {
             //UPDATE THE PLAYER
             Player p = pd.getPlayer();
             Team origTeam = p.getTeam();
-            origTeam = draft.getTeams().get(draft.getTeams().indexOf(p.getTeam()));
             Team newTeam = pd.getSelectedTeam();
             if(newTeam.getName().equals("Free Agency")){
                 draft.addPlayer(p);
                 p.setTeam(null);
-                if(p.getPosition().equalsIgnoreCase("P")){
+                p.setContract(null);
+            }
+            else{
+                p.setTeam(newTeam);
+                if(pd.getSelectedContract().equals("X")){
+                    p.setContract("X");
+                    newTeam.addToTaxiSquad(p);
+                }
+                else{
+                    if(p.getContract().equals("X")){
+                        Iterator itr = draft.getDraftOrder().iterator();
+                        while(itr.hasNext()){
+                            Player player = (Player) itr.next();
+                            if(player.getFirstName().equals(p.getFirstName()) && player.getLastName().equals(p.getLastName()) && player.getMLBTeam().equals(p.getMLBTeam())){
+                                itr.remove();
+                                break;
+                            }
+                        }
+                        itr = origTeam.getTaxiSquad().iterator();
+                        while(itr.hasNext()){
+                            Player player = (Player) itr.next();
+                            if(player.getFirstName().equals(p.getFirstName()) && player.getLastName().equals(p.getLastName()) && player.getMLBTeam().equals(p.getMLBTeam())){
+                                itr.remove();
+                                break;
+                            }
+                        }
+                    }
+                    p.setContract(pd.getSelectedContract());
+                    if(p.getPosition().equalsIgnoreCase("P"))
+                        newTeam.addPitcher(p);
+                    else{
+                        if(newTeam.addHitter(p, pd.getSelectedPosition())){
+                            ;
+                        }
+                        else
+                            errorHandler.handlePositionFullError();
+                    }
+                }
+            }
+            if(p.getPosition().equalsIgnoreCase("P")){
                     Iterator itr = origTeam.getPitchers().iterator();
                     while(itr.hasNext()){
                         Player pitcher = (Player) itr.next();
@@ -146,35 +184,9 @@ public class TeamsController {
                             break;
                         }
                     }
-            }
-            else
-                origTeam.removeHitter(p, pd.getSelectedPosition());
-            }
-            else{
-            p.setTeam(newTeam);
-            //NOW REMOVE THE PLAYER FROM ITS ORIGINAL TEAM
-            if(p.getPosition().equalsIgnoreCase("P"))
-                newTeam.addPitcher(p);
-            else
-                if(newTeam.addHitter(p, pd.getSelectedPosition()))
-                    ;
+                }
                 else
-                    errorHandler.handlePositionFullError();
-                    
-            if(p.getPosition().equalsIgnoreCase("P")){
-                Iterator itr = origTeam.getPitchers().iterator();
-                    while(itr.hasNext()){
-                        Player pitcher = (Player) itr.next();
-                        if(pitcher.getFirstName().equals(p.getFirstName()) && pitcher.getLastName().equals(p.getFirstName()) && pitcher.getMLBTeam().equals(p.getMLBTeam())){
-                            itr.remove();
-                            break;
-                        }
-                    }
-            }
-            else
-                origTeam.removeHitter(p, pd.getSelectedPosition());
-              
-            }
+                    origTeam.removeHitter(p, pd.getSelectedPosition());
             gui.getFileController().markAsEdited(gui);
         }
     }

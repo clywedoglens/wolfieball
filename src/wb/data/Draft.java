@@ -6,6 +6,7 @@
 package wb.data;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javafx.collections.FXCollections;
@@ -102,6 +103,52 @@ public class Draft {
     
     public Team getFreeAgency(){
         return freeAgency;
+    }
+    
+    public void updateTotalPoints(){
+        List<Team> allTeams = new ArrayList<>();
+        allTeams.addAll(teams);
+        
+        //RUNS
+        Collections.sort(allTeams, Team.Order.ByRuns.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //HOME RUNS
+        Collections.sort(allTeams, Team.Order.ByHR.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //RBI
+        Collections.sort(allTeams, Team.Order.ByRBI.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //SB
+        Collections.sort(allTeams, Team.Order.BySB.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //BA
+        Collections.sort(allTeams, Team.Order.ByBA.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //WINS
+        Collections.sort(allTeams, Team.Order.ByW.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //SAVES
+        Collections.sort(allTeams, Team.Order.BySV.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //K
+        Collections.sort(allTeams, Team.Order.ByK.descending());
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //ERA
+        Collections.sort(allTeams, Team.Order.ByERA);
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
+        //WHIP
+        Collections.sort(allTeams, Team.Order.ByWHIP);
+        for(int i = 0; i < allTeams.size(); i++)
+            allTeams.get(i).addTotalPoints(i + 1);
     }
     private void loadMLBTeams(){
         ArrayList<String> teamNames= new ArrayList<String>();

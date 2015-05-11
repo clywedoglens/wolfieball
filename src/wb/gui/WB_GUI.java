@@ -227,6 +227,22 @@ public class WB_GUI implements DraftDataView{
     TableColumn fantasyBAWHIPColumn;
     TableColumn fantasyContractColumn;
     TableColumn fantasySalaryColumn;
+    VBox taxiTableBox;
+    Label taxiSquadLabel;
+    TableView<Player> taxiTable;
+    TableColumn taxiPositionColumn;
+    TableColumn taxiFirstNameColumn;
+    TableColumn taxiLastNameColumn;
+    TableColumn taxiProTeamColumn;
+    TableColumn taxiPositionsColumn;
+    TableColumn taxiRWColumn;
+    TableColumn taxiHRSVColumn;
+    TableColumn taxiRBIKColumn;
+    TableColumn taxiSBERAColumn;
+    TableColumn taxiBAWHIPColumn;
+    TableColumn taxiContractColumn;
+    TableColumn taxiSalaryColumn;
+    
 
     //FANTASY STANDINGS SCREEN WORKSPACE
     VBox standingsTopPane;
@@ -419,6 +435,8 @@ public class WB_GUI implements DraftDataView{
     }
     @Override
     public void reloadDraft(Draft draftToReload) {
+        draftNameTextField.setText(draftToReload.getName());
+        draftToReload.updateTotalPoints();
         if( !workspaceActivated) {
             activateWorkspace();
         }
@@ -449,6 +467,7 @@ public class WB_GUI implements DraftDataView{
         newDraftButton.setDisable(true);
         loadDraftButton.setDisable(true);
         saveDraftButton.setDisable(true);
+        exportDraftButton.setDisable(true);
         
         fantasyTeamsButton.setDisable(true);
         playersButton.setDisable(true);
@@ -474,8 +493,10 @@ public class WB_GUI implements DraftDataView{
              ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
             fantasyTeamPlayers.addAll(teamToShow.getPitchers());
             for(ArrayList<Player> a: teamToShow.getHitters())
-            fantasyTeamPlayers.addAll(a);
+                fantasyTeamPlayers.addAll(a);
             fantasyTable.setItems(fantasyTeamPlayers);
+            ObservableList<Player> taxiSquadPlayers = FXCollections.observableArrayList(teamToShow.getTaxiSquad());
+            taxiTable.setItems(taxiSquadPlayers);
         }
     }
 
@@ -489,12 +510,25 @@ public class WB_GUI implements DraftDataView{
         playersTable.setItems(updatedList);
     }
 
+    public void updateStandingsTable(){
+        ((TableColumn) standingsTable.getColumns().get(0)).setVisible(false);
+        ((TableColumn) standingsTable.getColumns().get(0)).setVisible(true);
+    }
     public void enableDraftMode(){
         draftPauseAutoDraftButton.setDisable(false);
         draftAutoDraftButton.setDisable(true);
         draftDraftPlayerButton.setDisable(true);
         
-        disableToolBars();
+        newDraftButton.setDisable(true);
+        loadDraftButton.setDisable(true);
+        saveDraftButton.setDisable(true);
+        exportDraftButton.setDisable(true);
+        
+        fantasyTeamsButton.setDisable(true);
+        playersButton.setDisable(true);
+        teamsStandingsButton.setDisable(true);
+        draftSummaryButton.setDisable(true);
+        mlbTeamsButton.setDisable(true);
     }
     
     public void disableDraftMode(){
@@ -502,9 +536,9 @@ public class WB_GUI implements DraftDataView{
         draftAutoDraftButton.setDisable(false);
         draftDraftPlayerButton.setDisable(false);
         
-        newDraftButton.setDisable(true);
-        loadDraftButton.setDisable(true);
-        updateToolbarControls(true);
+        newDraftButton.setDisable(false);
+        loadDraftButton.setDisable(false);
+        updateToolbarControls(false);
     }
     /****************************************************************************/
     /* BELOW ARE ALL THE PRIVATE HELPER METHODS WE USE FOR INITIALIZING OUR GUI */
@@ -849,6 +883,8 @@ public class WB_GUI implements DraftDataView{
        fantasyRBIKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("RBIK"));
        fantasySBERAColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SBERA"));
        fantasyBAWHIPColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BAWHIP"));
+       fantasyContractColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("contract"));
+       fantasySalaryColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("salary"));
 
        fantasyTable.getColumns().add(fantasyPositionColumn);
        fantasyTable.getColumns().add(fantasyFirstNameColumn);
@@ -863,9 +899,57 @@ public class WB_GUI implements DraftDataView{
        fantasyTable.getColumns().add(fantasyContractColumn);
        fantasyTable.getColumns().add(fantasySalaryColumn);
 
+       taxiTableBox = new VBox();
+       taxiSquadLabel = initChildLabel(taxiTableBox, WB_PropertyType.TAXI_SQUAD_LABEL, CLASS_SUBHEADING_LABEL);
+       taxiTable = new TableView();
+       taxiTableBox.getChildren().add(taxiTable);
+       taxiTableBox.getStyleClass().add(CLASS_BORDERED_PANE);
+       
+       //TABLE COLUMNS
+       taxiPositionColumn = new TableColumn(COL_POSITION);
+       taxiFirstNameColumn = new TableColumn(COL_FIRSTNAME);
+       taxiLastNameColumn = new TableColumn(COL_LASTNAME);
+       taxiProTeamColumn = new TableColumn(COL_PROTEAM);
+       taxiPositionsColumn = new TableColumn(COL_POSITIONS);
+       taxiRWColumn = new TableColumn(COL_RW);
+       taxiHRSVColumn = new TableColumn(COL_HRSV);
+       taxiRBIKColumn = new TableColumn(COL_RBIK);
+       taxiSBERAColumn = new TableColumn(COL_SBERA);
+       taxiBAWHIPColumn = new TableColumn(COL_BAWHIP);
+       taxiContractColumn = new TableColumn(COL_CONTRACT);
+       taxiSalaryColumn = new TableColumn(COL_SALARY);
+
+        //LINK COLUMNS TO DATA
+       taxiPositionColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("teamPosition"));
+       taxiFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
+       taxiLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
+       taxiProTeamColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("MLBTeam"));
+       taxiPositionsColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("position"));
+       taxiRWColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("RW"));
+       taxiHRSVColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("HRSV"));
+       taxiRBIKColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("RBIK"));
+       taxiSBERAColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("SBERA"));
+       taxiBAWHIPColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("BAWHIP"));
+       taxiContractColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("contract"));
+       taxiSalaryColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("salary"));
+
+       taxiTable.getColumns().add(taxiPositionColumn);
+       taxiTable.getColumns().add(taxiFirstNameColumn);
+       taxiTable.getColumns().add(taxiLastNameColumn);
+       taxiTable.getColumns().add(taxiProTeamColumn);
+       taxiTable.getColumns().add(taxiPositionsColumn);
+       taxiTable.getColumns().add(taxiRWColumn);
+       taxiTable.getColumns().add(taxiHRSVColumn);
+       taxiTable.getColumns().add(taxiRBIKColumn);
+       taxiTable.getColumns().add(taxiSBERAColumn);
+       taxiTable.getColumns().add(taxiBAWHIPColumn);
+       taxiTable.getColumns().add(taxiContractColumn);
+       taxiTable.getColumns().add(taxiSalaryColumn);
+       
         teamsCenterPane.getChildren().add(lineupButtonsPane);
         teamsCenterPane.getChildren().add(lineupPane);
         teamsCenterPane.getChildren().add(fantasyTableBox);
+        teamsCenterPane.getChildren().add(taxiTableBox);
     }
 
     private void initStandingsScreenControls(){
@@ -896,7 +980,7 @@ public class WB_GUI implements DraftDataView{
         standingsMoneyLeftColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("MoneyLeft"));
         standingsMoneyPPColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("MoneyPP"));
         standingsRunsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("runs"));
-        standingsHomeRunsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("homeRuns"));
+        standingsHomeRunsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("HR"));
         standingsRBIColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("RBI"));
         standingsSBColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("SB"));
         standingsBAColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("BA"));
@@ -905,7 +989,7 @@ public class WB_GUI implements DraftDataView{
         standingsKColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("K"));
         standingsERAColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("ERA"));
         standingsWHIPColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("WHIP"));
-        standingsPointsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("Points"));
+        standingsPointsColumn.setCellValueFactory(new PropertyValueFactory<Team, Integer>("TotalPoints"));
         
         standingsTable.getColumns().add(standingsNameColumn);
         standingsTable.getColumns().add(standingsPlayersColumn);
@@ -945,16 +1029,18 @@ public class WB_GUI implements DraftDataView{
         draftPickNumberColumn = new TableColumn(COL_PICK);
         draftFirstNameColumn = new TableColumn(COL_FIRSTNAME);
         draftLastNameColumn = new TableColumn(COL_LASTNAME);
+        draftTeamNameColumn = new TableColumn(COL_TEAM);
         draftContractColumn = new TableColumn(COL_CONTRACT);
         draftSalaryColumn = new TableColumn(COL_SALARY);
         
         draftPickNumberColumn.setCellValueFactory(new PropertyValueFactory<Player, Integer>("PickNumber"));
         draftFirstNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("firstName"));
         draftLastNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("lastName"));
+        draftTeamNameColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("teamName"));
         draftContractColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("contract"));
         draftSalaryColumn.setCellValueFactory(new PropertyValueFactory<Player, String>("salary"));
         
-        draftSummaryTable.getColumns().addAll(draftPickNumberColumn, draftFirstNameColumn, draftLastNameColumn, draftContractColumn, draftSalaryColumn);
+        draftSummaryTable.getColumns().addAll(draftPickNumberColumn, draftFirstNameColumn, draftLastNameColumn, draftTeamNameColumn, draftContractColumn, draftSalaryColumn);
         draftSummaryTable.setItems(dataManager.getDraft().getDraftOrder());
     }
 
@@ -1042,6 +1128,7 @@ public class WB_GUI implements DraftDataView{
             screenController.handleScreenChangeRequest(this, PLAYER_SCREEN);
         });
         teamsStandingsButton.setOnAction(e -> {
+            updateStandingsTable();
             screenController.handleScreenChangeRequest(this, STANDINGS_SCREEN);
         });
         draftSummaryButton.setOnAction(e -> {

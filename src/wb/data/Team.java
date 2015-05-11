@@ -7,6 +7,8 @@ package wb.data;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,13 +21,17 @@ public class Team {
     String ownerName;
     List<Player> pitchers;
     List<ArrayList<Player>> hitters;
+    List<Player> taxiSquad;
     int draftNumber;
+    int totalPoints;
     public Team(){
         pitchers = new ArrayList<Player>();
         //EACH INDEX WILL SERVE AS A SEPARATE LIST FOR EACH POSITION, LISTED IN THE SPECIFIED ORDER 
         hitters = new ArrayList<ArrayList<Player>>();
         for(int i = 0; i < 9; i++)
             hitters.add(new ArrayList<Player>());
+        taxiSquad = new ArrayList<Player>();
+        totalPoints = 0;
     }
 
     public Team(String teamName, String ownerName) {
@@ -56,11 +62,25 @@ public class Team {
         this.draftNumber = draftNumber;
     }
     
-    public void addPitcher(Player pitcher){
-        if(pitchers.size() < 10){
+    public List<Player> getTaxiSquad(){
+        return taxiSquad;
+    }
+    
+    public void setTaxiSquad(ArrayList<Player> taxiSquad){
+        this.taxiSquad = taxiSquad;
+        
+    }
+    public void addToTaxiSquad(Player player){
+        if(taxiSquad.size() < 9)
+            taxiSquad.add(player);
+    }
+    public boolean addPitcher(Player pitcher){
+        if(pitchers.size() < 9){
             pitcher.setTeamPosition("P");
             pitchers.add(pitcher);
+            return true;
         }
+        return false;
     }
     public List<Player> getPitchers(){
         return pitchers;
@@ -71,7 +91,7 @@ public class Team {
     }
     public boolean addHitter(Player hitter, String position){
         switch(position.toUpperCase()) {
-            case "C" :  if(hitters.get(0).size() < 3){
+            case "C" :  if(hitters.get(0).size() < 2){
                             hitter.setTeamPosition("C");
                             hitters.get(0).add(hitter);
                         }
@@ -79,7 +99,7 @@ public class Team {
                             return false;
                         }
                        break;
-            case "1B" : if(hitters.get(1).size() < 2){
+            case "1B" : if(hitters.get(1).size() < 1){
                             hitter.setTeamPosition("1B");
                             hitters.get(1).add(hitter);
                         }
@@ -87,7 +107,7 @@ public class Team {
                             return false;
                         }
                         break;
-            case "CI" : if(hitters.get(2).size() < 2){
+            case "CI" : if(hitters.get(2).size() < 1){
                             hitter.setTeamPosition("CI");
                             hitters.get(2).add(hitter);
                         }
@@ -95,7 +115,7 @@ public class Team {
                            return false;
                         }
                         break;
-            case "3B" : if(hitters.get(3).size() < 2){
+            case "3B" : if(hitters.get(3).size() < 1){
                             hitter.setTeamPosition("3B");
                             hitters.get(3).add(hitter);
                         }
@@ -103,7 +123,7 @@ public class Team {
                             return false;
                         }
                         break;
-            case "2B" : if(hitters.get(4).size() < 2){
+            case "2B" : if(hitters.get(4).size() < 1){
                             hitter.setTeamPosition("2B");
                             hitters.get(4).add(hitter);
                         }
@@ -111,7 +131,7 @@ public class Team {
                             return false;
                         }
                         break;
-            case "MI" : if(hitters.get(5).size() < 2){
+            case "MI" : if(hitters.get(5).size() < 1){
                             hitter.setTeamPosition("MI");
                             hitters.get(5).add(hitter);
                         }
@@ -119,7 +139,7 @@ public class Team {
                             return false;
                         }
                         break;
-            case "SS" : if(hitters.get(6).size() < 2){
+            case "SS" : if(hitters.get(6).size() < 1){
                             hitter.setTeamPosition("SS");
                             hitters.get(6).add(hitter);
                         }
@@ -127,7 +147,7 @@ public class Team {
                             return false;
                         }
                         break;
-            case "OF" : if(hitters.get(7).size() < 6){
+            case "OF" : if(hitters.get(7).size() < 5){
                             hitter.setTeamPosition("OF");
                             hitters.get(7).add(hitter);
                         }
@@ -135,7 +155,7 @@ public class Team {
                             return false;
                         }
                         break;
-            case "U"  : if(hitters.get(8).size() < 10){
+            case "U"  : if(hitters.get(8).size() < 1){
                             hitter.setTeamPosition("U");
                             hitters.get(8).add(hitter);
                         }
@@ -271,9 +291,20 @@ public class Team {
     }
     
     public Integer getMoneyPP(){
-        
+        if(getPlayersNeeded() == 0)
+            return 0;
         return getMoneyLeft()/getPlayersNeeded();
     } 
+    
+    public Integer getRuns(){
+        int runs = 0;
+        for(ArrayList<Player> a: hitters){
+            for(Player p: a)
+                runs += Integer.parseInt(p.getERR());
+        }
+        return runs;
+    }
+    
     public Integer getHR(){
         int hr = 0;
         
@@ -315,7 +346,7 @@ public class Team {
             }
                 
         }
-        return average/numOfHitters;
+        return Double.parseDouble(new DecimalFormat("##.##").format(average/numOfHitters));
         
     }
     public Integer getWins(){
@@ -367,5 +398,127 @@ public class Team {
             whip += p.getWHIP();
         
         return Double.parseDouble(new DecimalFormat("##.##").format(whip/numOfPitchers));
+    }
+    
+    public void addTotalPoints(int totalPoints){
+        this.totalPoints += totalPoints;
+    }
+    
+    public Integer getTotalPoints(){
+        return totalPoints;
+    }
+    
+    public static enum Order implements Comparator {
+        ByRuns(){
+            public int compare(Team team1, Team team2){
+                return team1.getRuns().compareTo(team2.getRuns());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByHR(){
+            public int compare(Team team1, Team team2){
+                return team1.getHR().compareTo(team2.getHR());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByRBI(){
+            @Override
+            public int compare(Team team1, Team team2){
+                return team1.getRBI().compareTo(team2.getRBI());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        BySB(){
+            public int compare(Team team1, Team team2){
+                return team1.getSB().compareTo(team2.getSB());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByBA(){
+            public int compare(Team team1, Team team2){
+                return team1.getBA().compareTo(team2.getBA());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByW(){
+            public int compare(Team team1, Team team2){
+                return team1.getWins().compareTo(team2.getWins());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        BySV(){
+            public int compare(Team team1, Team team2){
+                return team1.getSaves().compareTo(team2.getSaves());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByK(){
+            public int compare(Team team1, Team team2){
+                return team1.getK().compareTo(team2.getK());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByERA(){
+            public int compare(Team team1, Team team2){
+                return team1.getERA().compareTo(team2.getERA());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        },
+        ByWHIP(){
+            public int compare(Team team1, Team team2){
+                return team1.getWHIP().compareTo(team2.getWHIP());
+            }
+
+            @Override
+            public int compare(Object o1, Object o2) {
+                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            }
+        };
+        
+        public abstract int compare(Team team1, Team team2);
+        
+        public Comparator ascending(){
+            return this;
+        }
+        
+        public Comparator descending(){
+            return Collections.reverseOrder(this);
+        }
     }
 }
