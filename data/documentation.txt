@@ -1,0 +1,17 @@
+George Vergara
+ID: 108861617
+Stage Name: OK Kid
+HW #1 
+
+Row Row Row Your Boat:
+
+I used three different audio tracks for the different waveforms: sin waves, square waves, and sawtooth.
+I modelled the song based on what the song would sound like in a C-Major scale, starting with C4. 
+The made every single "beat" a certain pitch and spaced them out with silence, typically around .4 seconds. 
+
+The order of pitches are: 
+C4 C4 C4 D4 E4 E4 D4 E4 F4 G4 (Each beat here is about .8 seconds, with the last one being 1.2 seconds)
+C5 C5 C5 G4 G4 G4 E4 E4 E4 C4 C4 C4 (Each beat here lasts .4 seconds, with silence of about .1 seconds in between)
+G4 F4 E4 D4 C4 (I spaced the beats out more for more of a "finishing" effect, beats lasted .2 seconds with gaps being .6 seconds. The last beat was 
+slightly longer at .4 seconds)
+ 
