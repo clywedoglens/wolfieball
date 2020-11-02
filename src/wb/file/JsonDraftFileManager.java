@@ -73,7 +73,10 @@ public class JsonDraftFileManager implements DraftFileManager{
    @Override
    public void saveDraft(Draft draftToSave) throws IOException {
        //BUILD FILE PATH
-       String draftListing = "" + draftToSave.getName();
+	   String draftName = draftToSave.getName();
+	   if(draftName == null)
+		   draftName = "default" + ((int) 100 * Math.random());
+       String draftListing = "" + draftName;
        String jsonFilePath = PATH_DRAFTS + draftListing + JSON_EXT;
        
        //INITIALIZE WRITER
@@ -90,7 +93,7 @@ public class JsonDraftFileManager implements DraftFileManager{
        
        //BUILD THE DRAFT
        JsonObject draftJsonObject = Json.createObjectBuilder()
-                                   .add(JSON_NAME, draftToSave.getName())
+                                   .add(JSON_NAME, draftName)
                                    .add(JSON_TEAMS, fantasyTeamsJsonArray)
                                    .add(JSON_DRAFT, fantasyDraftJsonArray)
                .build();
