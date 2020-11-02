@@ -36,6 +36,7 @@ public class DraftDataManager {
     }
     
     public void reset() {
+    	draft.setName("");
         draft.setNumber(DEFAULT_NUM);
         draft.clearTeams();
         try{

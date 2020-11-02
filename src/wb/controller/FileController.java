@@ -105,7 +105,7 @@ public class FileController {
                 dataManager.reset();
                 saved = false;
                 draftIO.loadAllPlayers(dataManager.getDraft());
-                
+                gui.updateDraftInfo(dataManager.getDraft());
                 gui.updateToolbarControls(saved);
                 
                 messageDialog.show(properties.getProperty(NEW_DRAFT_CREATED_MESSAGE));
@@ -124,9 +124,24 @@ public class FileController {
                 }
                 
                 if(continueToOpen) {
+                	
+                	DraftDataManager dataManager = gui.getDataManager();
+                	dataManager.reset();
+                    File selectedFile = promptToOpen(gui);
                     
-                    promptToOpen(gui);
-                    
+                  //ONLY OPEN A NEW FILE IF THE USER SAYS OK
+                    if (selectedFile != null) {
+                        try {
+                            Draft draftToLoad = gui.getDataManager().getDraft();
+                            draftIO.loadDraft(draftToLoad, selectedFile.getAbsolutePath());
+                            saved = true;
+                            gui.updateToolbarControls(saved);
+                            gui.reloadDraft(draftToLoad);
+                            gui.updateDraftInfo(draftToLoad);
+                        } catch (Exception e) {
+                            //WILL DO LATER
+                        }
+                    }
                     messageDialog.show(properties.getProperty(DRAFT_LOADED_MESSAGE));
                 }
             } catch (IOException ioe) {
@@ -192,25 +207,11 @@ public class FileController {
         return true;
     }
     
-    private void promptToOpen(WB_GUI gui) {
+    private File promptToOpen(WB_GUI gui) {
         //ASK USER WHICH DRAFT TO OPEN
         FileChooser draftFileChooser = new FileChooser();
         draftFileChooser.setInitialDirectory(new File(PATH_DRAFTS));
-        File selectedFile = draftFileChooser.showOpenDialog(gui.getWindow());
-        
-        //ONLY OPEN A NEW FILE IF THE USER SAYS OK
-        if (selectedFile != null) {
-            try {
-                Draft draftToLoad = gui.getDataManager().getDraft();
-                draftIO.loadDraft(draftToLoad, selectedFile.getAbsolutePath());
-                saved = true;
-                gui.updateToolbarControls(saved);
-                gui.reloadDraft(draftToLoad);
-                
-            } catch (Exception e) {
-                //WILL DO LATER
-            }
-        }
+        return draftFileChooser.showOpenDialog(gui.getWindow());
     }
     
     public void markFileAsNotSaved() {

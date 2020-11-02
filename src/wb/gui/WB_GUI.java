@@ -486,15 +486,17 @@ public class WB_GUI implements DraftDataView{
     public void updateDraftInfo(Draft draft) {
         draft.setName(draftNameTextField.getText());
         Team teamToShow = selectTeamComboBox.getSelectionModel().getSelectedItem();
+        ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
+        ObservableList<Player> taxiSquadPlayers;
         if(teamToShow != null){
-             ObservableList<Player> fantasyTeamPlayers = FXCollections.observableArrayList();
             fantasyTeamPlayers.addAll(teamToShow.getPitchers());
             for(ArrayList<Player> a: teamToShow.getHitters())
                 fantasyTeamPlayers.addAll(a);
-            fantasyTable.setItems(fantasyTeamPlayers);
-            ObservableList<Player> taxiSquadPlayers = FXCollections.observableArrayList(teamToShow.getTaxiSquad());
-            taxiTable.setItems(taxiSquadPlayers);
+            taxiSquadPlayers = FXCollections.observableArrayList(teamToShow.getTaxiSquad());
         }
+        fantasyTable.setItems(fantasyTeamPlayers);
+        taxiSquadPlayers = FXCollections.observableArrayList();
+        taxiTable.setItems(taxiSquadPlayers);
     }
 
     public void updateMLBTable(Draft draft) {
