@@ -12,6 +12,7 @@ import properties_manager.PropertiesManager;
 import static wb.WB_PropertyType.DRAFT_SAVED_MESSAGE;
 import static wb.WB_PropertyType.NEW_DRAFT_CREATED_MESSAGE;
 import static wb.WB_PropertyType.SAVE_UNSAVED_WORK_MESSAGE;
+import static wb.WB_PropertyType.DRAFT_LOADED_MESSAGE;
 import static wb.WB_StartupConstants.PATH_DRAFTS;
 import wb.data.Draft;
 import wb.data.DraftDataManager;
@@ -125,6 +126,8 @@ public class FileController {
                 if(continueToOpen) {
                     
                     promptToOpen(gui);
+                    
+                    messageDialog.show(properties.getProperty(DRAFT_LOADED_MESSAGE));
                 }
             } catch (IOException ioe) {
                 
@@ -200,9 +203,10 @@ public class FileController {
             try {
                 Draft draftToLoad = gui.getDataManager().getDraft();
                 draftIO.loadDraft(draftToLoad, selectedFile.getAbsolutePath());
-                gui.reloadDraft(draftToLoad);
                 saved = true;
                 gui.updateToolbarControls(saved);
+                gui.reloadDraft(draftToLoad);
+                
             } catch (Exception e) {
                 //WILL DO LATER
             }

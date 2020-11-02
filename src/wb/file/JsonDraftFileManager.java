@@ -75,7 +75,7 @@ public class JsonDraftFileManager implements DraftFileManager{
        //BUILD FILE PATH
 	   String draftName = draftToSave.getName();
 	   if(draftName == null)
-		   draftName = "default" + ((int) 100 * Math.random());
+		   draftName = "default" + ((int) (100 * Math.random()));
        String draftListing = "" + draftName;
        String jsonFilePath = PATH_DRAFTS + draftListing + JSON_EXT;
        

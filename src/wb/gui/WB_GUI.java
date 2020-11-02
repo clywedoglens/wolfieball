@@ -427,19 +427,16 @@ public class WB_GUI implements DraftDataView{
     }
 
     public void activateWorkspace() {
-        if(!workspaceActivated) {
-            //PUT THE MAIN WORKSPACE IN THE GUI WHEN A NEW DRAFT STARTS
-            wbPane.setCenter(workspaceScrollPane);
-            workspaceActivated = true;
-        }
+    	if(!workspaceActivated) {
+    		wbPane.setCenter(workspaceScrollPane);
+        	workspaceActivated = true;
+    	}
     }
     @Override
     public void reloadDraft(Draft draftToReload) {
         draftNameTextField.setText(draftToReload.getName());
         draftToReload.updateTotalPoints();
-        if( !workspaceActivated) {
-            activateWorkspace();
-        }
+        activateWorkspace();
 
 
     }
