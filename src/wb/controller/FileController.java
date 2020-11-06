@@ -11,7 +11,7 @@ import javafx.stage.FileChooser;
 import properties_manager.PropertiesManager;
 import static wb.WB_PropertyType.DRAFT_SAVED_MESSAGE;
 import static wb.WB_PropertyType.NEW_DRAFT_CREATED_MESSAGE;
-import static wb.WB_PropertyType.SAVE_UNSAVED_WORK_MESSAGE;
+import static wb.WB_PropertyType.DRAFT_UNSAVED_WORK_MESSAGE;
 import static wb.WB_PropertyType.DRAFT_LOADED_MESSAGE;
 import static wb.WB_StartupConstants.PATH_DRAFTS;
 import wb.data.Draft;
@@ -187,7 +187,7 @@ public class FileController {
     
     private boolean promptToSave(WB_GUI gui) throws IOException {
         // PROMPT THE USER TO SAVE UNSAVED WORK
-        yesNoCancelDialog.show(properties.getProperty(SAVE_UNSAVED_WORK_MESSAGE));
+        yesNoCancelDialog.show(properties.getProperty(DRAFT_UNSAVED_WORK_MESSAGE));
         
         // AND NOW GET THE USER'S SELECTION
         String selection = yesNoCancelDialog.getSelection();
